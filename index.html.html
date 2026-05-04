@@ -1,0 +1,1769 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deli Frozen — Sistema de Caja</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --tq:#7CBBB8;--tq-d:#5a9e9b;--tq-l:#d0edec;
+  --pk:#CF6080;--pk-d:#b0485e;--pk-l:#f5d0da;
+  --vl:#845599;--vl-d:#6a3d7d;--vl-l:#e8d8f5;
+  --bg:#f0f4f8;--white:#fff;--text:#1a1a2e;--muted:#6b7280;
+  --border:#e2e8f0;--ok:#10b981;--warn:#f59e0b;--err:#ef4444;
+  --sh:0 4px 20px rgba(0,0,0,.08);--sh-lg:0 8px 40px rgba(0,0,0,.14);
+  --r:16px;--rs:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+/* ── LOGIN ── */
+#login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--tq) 0%,var(--vl) 100%);padding:20px;}
+.login-box{background:var(--white);border-radius:24px;padding:40px;width:100%;max-width:420px;box-shadow:var(--sh-lg);}
+.login-logo{text-align:center;margin-bottom:28px;}
+.login-logo .ice{font-size:52px;margin-bottom:8px;}
+.login-logo h1{font-size:28px;font-weight:900;color:var(--tq-d);}
+.login-logo p{font-size:13px;color:var(--muted);}
+.login-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:24px;}
+.login-tab{padding:10px;border-radius:var(--rs);border:2px solid var(--border);text-align:center;cursor:pointer;font-weight:700;font-size:13px;color:var(--muted);transition:all .2s;}
+.login-tab.active{border-color:var(--tq);background:var(--tq-l);color:var(--tq-d);}
+.hint-box{background:var(--tq-l);border-radius:var(--rs);padding:12px 16px;margin-top:16px;font-size:12px;color:var(--tq-d);line-height:1.7;}
+.login-error{background:#fee2e2;color:#991b1b;padding:10px 14px;border-radius:var(--rs);font-size:13px;font-weight:600;margin-bottom:14px;display:none;}
+
+/* ── OPEN REGISTER ── */
+#open-register-screen{display:none;min-height:100vh;background:linear-gradient(135deg,var(--tq),var(--vl));align-items:center;justify-content:center;padding:20px;}
+.or-box{background:white;border-radius:24px;padding:40px;width:100%;max-width:460px;box-shadow:var(--sh-lg);text-align:center;}
+.or-icon{font-size:60px;margin-bottom:16px;}
+.or-box h2{font-size:26px;font-weight:900;color:var(--text);margin-bottom:6px;}
+.or-box p{font-size:14px;color:var(--muted);margin-bottom:24px;}
+
+/* ── GLOBAL ── */
+.btn{border:none;border-radius:var(--rs);padding:10px 20px;font-family:'Nunito',sans-serif;font-weight:700;font-size:14px;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:6px;}
+.btn-primary{background:var(--tq);color:white;}.btn-primary:hover{background:var(--tq-d);transform:translateY(-1px);}
+.btn-pink{background:var(--pk);color:white;}.btn-pink:hover{background:var(--pk-d);}
+.btn-purple{background:var(--vl);color:white;}.btn-purple:hover{background:var(--vl-d);}
+.btn-danger{background:var(--err);color:white;}.btn-danger:hover{opacity:.88;}
+.btn-success{background:var(--ok);color:white;}.btn-success:hover{opacity:.88;}
+.btn-warn{background:var(--warn);color:white;}.btn-warn:hover{opacity:.88;}
+.btn-outline{background:transparent;border:2px solid var(--tq);color:var(--tq);}.btn-outline:hover{background:var(--tq-l);}
+.btn-sm{padding:6px 14px;font-size:12px;}.btn-lg{padding:14px 28px;font-size:16px;border-radius:12px;}.btn-full{width:100%;justify-content:center;}
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;}
+.badge-teal{background:var(--tq-l);color:var(--tq-d);}.badge-pink{background:var(--pk-l);color:var(--pk-d);}.badge-purple{background:var(--vl-l);color:var(--vl-d);}.badge-green{background:#d1fae5;color:#065f46;}.badge-warn{background:#fef3c7;color:#92400e;}.badge-red{background:#fee2e2;color:#991b1b;}
+.form-group{margin-bottom:14px;}
+.form-group label{display:block;font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em;}
+.form-control{width:100%;padding:10px 14px;border:2px solid var(--border);border-radius:var(--rs);font-family:'Nunito',sans-serif;font-size:14px;color:var(--text);background:var(--bg);transition:border-color .2s;}
+.form-control:focus{outline:none;border-color:var(--tq);background:white;}
+.card{background:var(--white);border-radius:var(--r);padding:20px;box-shadow:var(--sh);}
+.card-title{font-size:14px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.empty{text-align:center;padding:40px 20px;color:var(--muted);}
+.empty .empty-icon{font-size:48px;margin-bottom:12px;}
+
+/* ── HEADER ── */
+.header{background:linear-gradient(135deg,var(--tq) 0%,var(--vl) 100%);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--sh-lg);position:sticky;top:0;z-index:100;}
+.logo{display:flex;align-items:center;gap:10px;}
+.logo-icon{width:40px;height:40px;background:white;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;}
+.logo-text{color:white;}.logo-text h1{font-size:18px;font-weight:900;line-height:1;}.logo-text p{font-size:11px;opacity:.85;}
+.header-right{display:flex;align-items:center;gap:10px;}
+.header-clock{font-family:'Space Mono',monospace;color:white;font-size:13px;text-align:right;}
+.header-clock .time{font-size:20px;font-weight:700;}
+.user-badge{background:rgba(255,255,255,.2);color:white;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;}
+.logout-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:white;padding:6px 12px;border-radius:var(--rs);font-size:12px;font-weight:700;cursor:pointer;}
+.logout-btn:hover{background:rgba(255,255,255,.25);}
+.close-register-btn{background:rgba(239,68,68,.7);border:1px solid rgba(239,68,68,.5);color:white;padding:6px 12px;border-radius:var(--rs);font-size:12px;font-weight:700;cursor:pointer;}
+.close-register-btn:hover{background:rgba(239,68,68,.9);}
+
+/* ── NAV ── */
+.nav-tabs{display:flex;gap:4px;background:white;border-bottom:2px solid var(--border);padding:0 20px;overflow-x:auto;}
+.nav-tab{padding:12px 18px;font-size:13px;font-weight:700;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;color:var(--muted);transition:all .2s;display:flex;align-items:center;gap:6px;}
+.nav-tab.active{color:var(--tq-d);border-bottom-color:var(--tq);}
+.nav-tab:hover:not(.active){color:var(--text);background:var(--bg);}
+
+/* ── PAGES ── */
+.main{padding:20px;max-width:1400px;margin:0 auto;}
+.page{display:none;}.page.active{display:block;}
+
+/* ── POS ── */
+.pos-layout{display:grid;grid-template-columns:1fr 400px;gap:16px;}
+.menu-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;}
+
+/* Tarjeta minimalista */
+.menu-item{
+  background:white;border:1.5px solid var(--border);border-radius:14px;
+  overflow:hidden;cursor:pointer;transition:all .2s;
+  display:flex;flex-direction:column;box-shadow:0 2px 8px rgba(0,0,0,.05);
+}
+.menu-item:hover{border-color:var(--tq);transform:translateY(-3px);box-shadow:var(--sh);}
+.menu-item-img-wrap{position:relative;width:100%;height:110px;overflow:hidden;background:var(--bg);}
+.menu-item-img-wrap img{width:100%;height:100%;object-fit:cover;display:block;}
+.menu-item-img-placeholder{width:100%;height:110px;background:linear-gradient(135deg,var(--tq-l),var(--vl-l));display:flex;align-items:center;justify-content:center;font-size:38px;}
+.menu-item-badge{position:absolute;top:7px;left:7px;background:var(--pk);color:white;font-size:9px;font-weight:800;padding:2px 7px;border-radius:20px;letter-spacing:.03em;}
+.menu-item-body{padding:10px 12px 12px;}
+.item-name{font-size:13px;font-weight:800;color:var(--text);margin-bottom:2px;line-height:1.3;}
+.item-price{font-size:18px;font-weight:900;color:var(--tq-d);font-family:'Space Mono',monospace;line-height:1;}
+.item-toppings-tag{display:inline-flex;align-items:center;gap:4px;margin-top:5px;background:var(--tq-l);color:var(--tq-d);font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;}
+.item-desc-small{font-size:10px;color:var(--muted);margin-top:3px;}
+
+.filter-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+.filter-tab{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;border:2px solid var(--border);background:white;color:var(--muted);transition:all .15s;}
+.filter-tab.active{background:var(--tq);color:white;border-color:var(--tq);}
+
+/* ── TOPPING SELECTOR MODAL ── */
+.ts-modal{background:white;border-radius:20px;padding:0;width:100%;max-width:560px;box-shadow:var(--sh-lg);max-height:94vh;overflow:hidden;display:flex;flex-direction:column;}
+
+/* Header */
+.ts-header{background:linear-gradient(135deg,var(--tq),var(--vl));padding:16px 22px;}
+.ts-header-row{display:flex;justify-content:space-between;align-items:flex-start;}
+.ts-item-info h3{font-size:19px;font-weight:900;color:white;margin:0 0 2px;}
+.ts-item-info p{font-size:12px;color:rgba(255,255,255,.85);margin:0;}
+.ts-header-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;}
+.ts-price-tag{font-family:'Space Mono',monospace;font-size:20px;font-weight:700;color:white;}
+.ts-close{background:rgba(255,255,255,.2);border:none;color:white;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+
+/* Progress steps */
+.ts-steps{display:flex;gap:0;background:rgba(0,0,0,.15);margin-top:12px;border-radius:10px;overflow:hidden;}
+.ts-step{flex:1;padding:7px 4px;text-align:center;font-size:11px;font-weight:700;color:rgba(255,255,255,.6);transition:all .2s;cursor:default;}
+.ts-step.active{background:rgba(255,255,255,.25);color:white;}
+.ts-step.done{background:rgba(16,185,129,.4);color:white;}
+.ts-step-num{display:block;font-size:14px;font-weight:900;line-height:1;}
+
+/* Presupuesto counter */
+.ts-budget-bar{display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.15);border-radius:10px;padding:8px 14px;margin-top:10px;}
+.ts-budget-label{font-size:11px;color:rgba(255,255,255,.85);font-weight:600;}
+.ts-budget-slots{display:flex;gap:4px;}
+.ts-slot{width:22px;height:22px;border-radius:6px;border:2px solid rgba(255,255,255,.5);background:transparent;transition:all .2s;}
+.ts-slot.filled{background:white;border-color:white;}
+.ts-slot.filled-jalea{background:#fbbf24;border-color:#fbbf24;}
+
+/* Body */
+.ts-body{padding:16px 20px;overflow-y:auto;flex:1;}
+
+/* Section title */
+.ts-sec{margin-bottom:16px;}
+.ts-sec-title{font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;}
+.ts-sec-badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;}
+
+/* Chip grid */
+.ts-chip-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;}
+.ts-chip{border:2px solid var(--border);border-radius:12px;padding:10px 8px;cursor:pointer;transition:all .18s;background:white;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;position:relative;}
+.ts-chip:hover{border-color:var(--tq);transform:translateY(-1px);}
+.ts-chip.active-jalea{border-color:#f59e0b;background:#fffbeb;}
+.ts-chip.active-topping{border-color:var(--tq);background:var(--tq-l);}
+.ts-chip.active-extra{border-color:var(--vl);background:var(--vl-l);}
+.ts-chip .ch-emoji{font-size:24px;line-height:1;}
+.ts-chip .ch-name{font-size:11px;font-weight:700;color:var(--text);line-height:1.2;}
+.ts-chip .ch-price{font-size:10px;color:var(--muted);}
+.ts-chip .ch-check{position:absolute;top:5px;right:5px;width:16px;height:16px;border-radius:50%;background:var(--tq);display:none;align-items:center;justify-content:center;}
+.ts-chip.active-jalea .ch-check{display:flex;background:#f59e0b;}
+.ts-chip.active-topping .ch-check{display:flex;background:var(--tq);}
+.ts-chip.active-extra .ch-check{display:flex;background:var(--vl);}
+.ts-chip .ch-check::after{content:'✓';font-size:9px;color:white;font-weight:900;}
+
+/* Divider between categories */
+.ts-cat-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin:12px 0 6px;padding-left:2px;}
+
+/* Nav buttons */
+.ts-nav{display:flex;gap:10px;padding:14px 20px;border-top:1px solid var(--border);background:white;}
+.ts-nav .ts-back-btn{background:var(--bg);color:var(--muted);border:none;border-radius:12px;padding:12px 20px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;cursor:pointer;}
+.ts-nav .ts-next-btn{flex:1;background:linear-gradient(135deg,var(--tq),var(--vl));color:white;border:none;border-radius:12px;padding:12px;font-family:'Nunito',sans-serif;font-size:15px;font-weight:900;cursor:pointer;transition:all .2s;}
+.ts-nav .ts-next-btn:hover{opacity:.9;}
+
+/* Running total in footer */
+.ts-footer-total{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.ts-footer-total span:first-child{font-size:13px;color:var(--muted);}
+.ts-footer-total span:last-child{font-family:'Space Mono',monospace;font-size:20px;font-weight:900;color:var(--tq-d);}
+
+/* Info box */
+.ts-info-box{background:var(--tq-l);border-radius:10px;padding:10px 14px;font-size:12px;color:var(--tq-d);font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.ts-info-box.warn{background:#fef3c7;color:#92400e;}
+.ts-info-box.amber{background:#fffbeb;color:#92400e;}
+
+/* ── CART ── */
+.cart-container{display:flex;flex-direction:column;gap:12px;}
+.cart-items{max-height:280px;overflow-y:auto;}
+.cart-item{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);}
+.cart-item:last-child{border-bottom:none;}
+.cart-item-thumb{width:36px;height:36px;border-radius:8px;object-fit:cover;background:var(--tq-l);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.cart-item-name{flex:1;font-size:13px;font-weight:700;}
+.qty-btn{width:26px;height:26px;border:none;border-radius:8px;background:var(--bg);cursor:pointer;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;}
+.qty-btn:hover{background:var(--tq-l);}
+.cart-item-price{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;min-width:50px;text-align:right;}
+.total-row{display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;}
+.total-row.main{font-size:20px;font-weight:900;color:var(--tq-d);}
+.change-box{background:var(--vl-l);border-radius:var(--rs);padding:12px;margin:10px 0;}
+.change-display{font-family:'Space Mono',monospace;font-size:22px;font-weight:700;color:var(--vl-d);}
+.order-name-box{background:var(--pk-l);border-radius:var(--rs);padding:12px;margin-bottom:12px;}
+
+/* ── PAYMENT METHODS ── */
+.pay-methods{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0;}
+.pay-method{border:2px solid var(--border);border-radius:var(--rs);padding:10px;cursor:pointer;text-align:center;transition:all .2s;background:white;}
+.pay-method:hover{border-color:var(--tq);}
+.pay-method.active{border-color:var(--tq);background:var(--tq-l);}
+.pay-method .pm-icon{font-size:22px;margin-bottom:4px;}
+.pay-method .pm-label{font-size:12px;font-weight:800;color:var(--text);}
+
+/* ── PENDING ── */
+.pending-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;}
+.pending-card{background:white;border-radius:var(--r);padding:16px;border-left:5px solid var(--warn);box-shadow:var(--sh);cursor:pointer;transition:all .2s;position:relative;}
+.pending-card:hover{transform:translateY(-2px);box-shadow:var(--sh-lg);}
+.pending-card.from-kiosk{border-left-color:var(--pk);}
+.kiosk-tag{position:absolute;top:10px;right:10px;background:var(--pk-l);color:var(--pk-d);font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;}
+.pending-card .order-num{font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:4px;}
+.pending-card .client-name{font-size:18px;font-weight:900;margin-bottom:8px;}
+.pending-card .order-items{font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.6;}
+.pending-card .order-total{font-family:'Space Mono',monospace;font-size:16px;font-weight:700;color:var(--tq-d);}
+.pulse{animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+
+/* ── STATS ── */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px;}
+.stat-card{background:white;border-radius:var(--r);padding:16px;box-shadow:var(--sh);text-align:center;}
+.stat-card .stat-icon{font-size:26px;margin-bottom:6px;}
+.stat-card .stat-value{font-family:'Space Mono',monospace;font-size:22px;font-weight:700;color:var(--tq-d);}
+.stat-card .stat-label{font-size:12px;color:var(--muted);font-weight:600;margin-top:4px;}
+.sales-table{width:100%;border-collapse:collapse;}
+.sales-table th{text-align:left;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;padding:8px 12px;border-bottom:2px solid var(--border);}
+.sales-table td{padding:9px 12px;font-size:13px;border-bottom:1px solid var(--border);}
+.sales-table tr:hover td{background:var(--bg);}
+.bar-wrap{display:flex;align-items:center;gap:8px;}
+.bar-track{flex:1;background:var(--bg);border-radius:4px;height:8px;}
+.bar-fill{height:8px;border-radius:4px;background:var(--tq);}
+
+/* ── AI ── */
+.ai-header{background:linear-gradient(135deg,var(--vl),var(--pk));border-radius:var(--r);padding:20px;color:white;margin-bottom:20px;display:flex;align-items:center;gap:16px;}
+.suggestion-card{background:white;border-radius:var(--r);padding:18px;box-shadow:var(--sh);margin-bottom:12px;border-left:4px solid var(--tq);}
+.suggestion-card.warning{border-left-color:var(--warn);}
+.suggestion-card.success{border-left-color:var(--ok);}
+.sug-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:6px;}
+.sug-title{font-size:15px;font-weight:800;}
+.sug-body{font-size:13px;color:var(--muted);line-height:1.6;}
+.ai-spinner{width:40px;height:40px;border:4px solid var(--border);border-top-color:var(--vl);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── MENU EDITOR ── */
+.menu-list-item{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--border);border-radius:var(--rs);margin-bottom:8px;background:white;}
+.menu-list-thumb{width:44px;height:44px;border-radius:8px;object-fit:cover;background:var(--tq-l);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+.menu-list-item .item-info{flex:1;}
+.menu-list-item .item-info .name{font-size:14px;font-weight:800;}
+.menu-list-item .item-info .price{font-size:13px;color:var(--tq-d);font-family:'Space Mono',monospace;}
+.menu-list-item .item-info .cat{font-size:11px;color:var(--muted);}
+.img-upload-area{border:2px dashed var(--border);border-radius:var(--rs);padding:20px;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg);}
+.img-upload-area:hover{border-color:var(--tq);background:var(--tq-l);}
+.img-upload-area .upload-icon{font-size:28px;margin-bottom:6px;}
+.img-upload-area p{font-size:12px;color:var(--muted);}
+.img-preview{width:100%;height:120px;object-fit:cover;border-radius:var(--rs);margin-bottom:8px;}
+
+/* ── MODALS ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.open{display:flex;}
+.modal{background:white;border-radius:var(--r);padding:24px;width:100%;max-width:480px;box-shadow:var(--sh-lg);max-height:90vh;overflow-y:auto;}
+.modal h3{font-size:20px;font-weight:900;margin-bottom:16px;}
+.modal-actions{display:flex;gap:10px;margin-top:16px;}
+
+/* ── COBRO MODAL ── */
+.cobro-product-list{background:var(--bg);border-radius:var(--rs);padding:14px;margin-bottom:14px;}
+.cobro-product-item{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px;}
+.cobro-product-item:last-child{border-bottom:none;}
+.cobro-total-line{display:flex;justify-content:space-between;font-size:22px;font-weight:900;color:var(--tq-d);padding:12px 0;border-top:2px solid var(--border);font-family:'Space Mono',monospace;}
+.cobro-change-result{background:var(--tq-l);border-radius:var(--rs);padding:14px;margin-top:10px;text-align:center;}
+.cobro-change-label{font-size:12px;font-weight:700;color:var(--tq-d);margin-bottom:4px;}
+.cobro-change-amount{font-family:'Space Mono',monospace;font-size:32px;font-weight:900;color:var(--tq-d);}
+.cobro-change-result.insuficiente{background:#fee2e2;}
+.cobro-change-result.insuficiente .cobro-change-label{color:#991b1b;}
+.cobro-change-result.insuficiente .cobro-change-amount{color:#991b1b;}
+.pay-confirm-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;}
+
+/* ── CLOSE REGISTER ── */
+.close-reg-summary{background:linear-gradient(135deg,var(--tq-l),var(--vl-l));border-radius:var(--r);padding:20px;margin-bottom:16px;}
+.crs-row{display:flex;justify-content:space-between;font-size:14px;padding:6px 0;border-bottom:1px solid rgba(0,0,0,.08);}
+.crs-row:last-child{border-bottom:none;}
+.crs-total{display:flex;justify-content:space-between;font-size:22px;font-weight:900;color:var(--tq-d);padding-top:12px;font-family:'Space Mono',monospace;}
+
+/* ── KIOSK ── */
+#kiosk-screen{display:none;min-height:100vh;background:linear-gradient(160deg,var(--tq-l),var(--vl-l));}
+.kiosk-header{background:linear-gradient(135deg,var(--tq),var(--vl));padding:16px 24px;display:flex;align-items:center;justify-content:space-between;}
+.kiosk-header h1{color:white;font-size:22px;font-weight:900;}
+.kiosk-header p{color:rgba(255,255,255,.85);font-size:13px;}
+.kiosk-layout{display:grid;grid-template-columns:1fr 340px;gap:0;min-height:calc(100vh - 70px);}
+.kiosk-menu{padding:20px;overflow-y:auto;}
+.kiosk-menu-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;}
+.kiosk-item{background:white;border:3px solid var(--border);border-radius:var(--r);padding:14px;cursor:pointer;text-align:center;transition:all .2s;box-shadow:var(--sh);}
+.kiosk-item:hover{border-color:var(--tq);transform:translateY(-3px);box-shadow:var(--sh-lg);}
+.kiosk-item-img{width:100%;height:90px;object-fit:cover;border-radius:10px;margin-bottom:8px;}
+.kiosk-item-placeholder{width:100%;height:90px;border-radius:10px;margin-bottom:8px;background:linear-gradient(135deg,var(--tq-l),var(--vl-l));display:flex;align-items:center;justify-content:center;font-size:36px;}
+.ki-name{font-size:13px;font-weight:800;margin-bottom:4px;line-height:1.3;}
+.ki-desc{font-size:11px;color:var(--muted);margin-bottom:6px;}
+.ki-price{font-size:20px;font-weight:900;color:var(--tq-d);font-family:'Space Mono',monospace;}
+.kiosk-sidebar{background:white;border-left:2px solid var(--border);display:flex;flex-direction:column;padding:20px;box-shadow:-4px 0 20px rgba(0,0,0,.06);}
+.kiosk-cart-items{flex:1;overflow-y:auto;max-height:calc(100vh - 440px);}
+.kiosk-cart-item{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);}
+.kiosk-cart-item:last-child{border-bottom:none;}
+.kci-name{flex:1;font-size:13px;font-weight:700;}
+.kci-price{font-family:'Space Mono',monospace;font-size:12px;font-weight:700;min-width:48px;text-align:right;}
+.kiosk-total-box{border-top:2px solid var(--border);padding-top:14px;margin-top:10px;}
+.kiosk-send-btn{width:100%;background:linear-gradient(135deg,var(--tq),var(--vl));color:white;border:none;border-radius:14px;padding:16px;font-family:'Nunito',sans-serif;font-size:16px;font-weight:900;cursor:pointer;transition:all .2s;box-shadow:var(--sh);margin-top:12px;}
+.kiosk-send-btn:hover{transform:translateY(-2px);box-shadow:var(--sh-lg);}
+.kiosk-send-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+.kiosk-filter-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
+.kiosk-filter-tab{padding:8px 16px;border-radius:20px;font-size:13px;font-weight:700;cursor:pointer;border:2px solid var(--border);background:white;color:var(--muted);transition:all .15s;}
+.kiosk-filter-tab.active{background:var(--tq);color:white;border-color:var(--tq);}
+.kiosk-success{display:none;position:fixed;inset:0;background:linear-gradient(135deg,var(--ok),var(--tq));z-index:2000;flex-direction:column;align-items:center;justify-content:center;color:white;text-align:center;padding:40px;}
+.kiosk-success.show{display:flex;}
+.kiosk-success .big-emoji{font-size:80px;margin-bottom:20px;animation:bounce .6s ease;}
+@keyframes bounce{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
+.kiosk-success h2{font-size:32px;font-weight:900;margin-bottom:10px;}
+.kiosk-success p{font-size:18px;opacity:.9;}
+
+/* ── REGISTER HISTORY ── */
+.reg-card{background:white;border-radius:var(--r);padding:16px;box-shadow:var(--sh);margin-bottom:10px;border-left:4px solid var(--tq);}
+.reg-card.closed{border-left-color:var(--ok);}
+.reg-card .reg-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.reg-card .reg-title{font-size:15px;font-weight:800;}
+.reg-card .reg-detail{font-size:12px;color:var(--muted);line-height:1.8;}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--text);color:white;padding:12px 20px;border-radius:var(--rs);font-weight:700;font-size:13px;z-index:9999;display:none;animation:slideUp .3s ease;}
+@keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+::-webkit-scrollbar{width:6px;}::-webkit-scrollbar-track{background:var(--bg);}::-webkit-scrollbar-thumb{background:var(--tq-l);border-radius:3px;}
+</style>
+</head>
+<body>
+
+<!-- ══════════ LOGIN ══════════ -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo"><div class="ice">🍦</div><h1>DELI FROZEN</h1><p>Mata de Cacao · Babahoyo, Ecuador</p></div>
+    <div class="login-tabs">
+      <div class="login-tab active" onclick="setLoginMode('caja',this)">🏪 Caja</div>
+      <div class="login-tab" onclick="setLoginMode('cliente',this)">🛍️ Kiosko</div>
+    </div>
+    <div id="login-error" class="login-error"></div>
+    <div class="form-group"><label>Usuario</label><input type="text" class="form-control" id="login-user" placeholder="Ingresa tu usuario" autocomplete="off"></div>
+    <div class="form-group"><label>Contraseña</label><input type="password" class="form-control" id="login-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <button class="btn btn-primary btn-full btn-lg" onclick="doLogin()">🔐 Ingresar</button>
+    <div class="hint-box" id="login-hint">
+      <strong>Caja:</strong> usuario <code>caja</code> · clave <code>deli2025</code><br>
+      <strong>Kiosko:</strong> usuario <code>cliente</code> · clave <code>helado</code>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ OPEN REGISTER ══════════ -->
+<div id="open-register-screen" style="display:none;min-height:100vh;background:linear-gradient(135deg,var(--tq),var(--vl));align-items:center;justify-content:center;padding:20px;display:none;">
+  <div class="or-box">
+    <div class="or-icon">🏪</div>
+    <h2>Apertura de Caja</h2>
+    <p>Antes de comenzar, registra la apertura del día</p>
+    <div class="form-group"><label>Nombre del cajero</label><input type="text" class="form-control" id="opener-name" placeholder="Tu nombre completo"></div>
+    <div class="form-group"><label>Monto de apertura ($) — efectivo inicial en caja</label><input type="number" class="form-control" id="opening-amount" placeholder="0.00" step="0.50"></div>
+    <div class="form-group"><label>Observaciones (opcional)</label><input type="text" class="form-control" id="opening-notes" placeholder="Ej: Todo en orden, falta cambio..."></div>
+    <button class="btn btn-success btn-full btn-lg" style="margin-top:8px;" onclick="openRegister()">✅ Abrir Caja y Comenzar</button>
+  </div>
+</div>
+
+<!-- ══════════ APP (CAJA) ══════════ -->
+<div id="app" style="display:none;">
+  <div class="header">
+    <div class="logo"><div class="logo-icon">🍦</div><div class="logo-text"><h1>DELI FROZEN</h1><p id="header-cashier-name">Sistema de Caja</p></div></div>
+    <div class="header-right">
+      <div class="header-clock"><div class="time" id="clock">00:00:00</div><div id="date-display" style="font-size:11px;"></div></div>
+      <div class="user-badge" id="header-user-badge">🏪 Cajero</div>
+      <button class="close-register-btn" onclick="openCloseRegisterModal()">🔒 Cerrar Caja</button>
+      <button class="logout-btn" onclick="doLogout()">Salir</button>
+    </div>
+  </div>
+  <div class="nav-tabs">
+    <div class="nav-tab active" onclick="showPage('pos',this)">🛒 Nueva Venta</div>
+    <div class="nav-tab" onclick="showPage('pending',this)">⏳ Pedidos <span id="pending-count" class="badge badge-warn" style="margin-left:4px;">0</span></div>
+    <div class="nav-tab" onclick="showPage('contabilidad',this)">📊 Contabilidad</div>
+    <div class="nav-tab" onclick="showPage('sugerencias',this)">🤖 IA</div>
+    <div class="nav-tab" onclick="showPage('menu-editor',this)">⚙️ Menú</div>
+    <div class="nav-tab" onclick="showPage('register-history',this)">📒 Historial Caja</div>
+  </div>
+  <div class="main">
+
+    <!-- POS -->
+    <div id="page-pos" class="page active">
+      <div class="pos-layout">
+        <div>
+          <div class="card" style="margin-bottom:16px;">
+            <div class="card-title">🍦 Selecciona productos</div>
+            <div class="filter-tabs" id="menu-filter-tabs"></div>
+            <div class="menu-grid" id="menu-grid"></div>
+          </div>
+        </div>
+        <div class="cart-container">
+          <div class="card">
+            <div class="order-name-box">
+              <label style="font-size:11px;font-weight:700;color:var(--pk-d);display:block;margin-bottom:6px;">👤 Nombre del Cliente</label>
+              <input type="text" class="form-control" id="customer-name" placeholder="Ej: María, Mesa 2..." style="margin-top:4px;">
+            </div>
+            <div class="card-title">🛒 Pedido Actual</div>
+            <div class="cart-items" id="cart-items"><div class="empty"><div class="empty-icon">🛒</div><p>Agrega productos</p></div></div>
+            <div id="cart-total-section" style="display:none;">
+              <div style="border-top:2px solid var(--border);padding-top:12px;">
+                <div class="total-row main"><span>TOTAL</span><span id="total">$0.00</span></div>
+                <button class="btn btn-success btn-full btn-lg" style="margin-top:10px;" onclick="openCobroModal()">💰 Cobrar</button>
+                <button class="btn btn-outline btn-full btn-sm" style="margin-top:6px;" onclick="clearCart()">🗑️ Limpiar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PENDING -->
+    <div id="page-pending" class="page">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <div><h2 style="font-size:22px;font-weight:900;">⏳ Pedidos en Espera</h2>
+        <p style="color:var(--muted);font-size:13px;">Los pedidos <span class="badge badge-pink">🛍️ Kiosko</span> vienen del cliente. Haz clic para entregar.</p></div>
+      </div>
+      <div id="pending-orders-grid"><div class="empty"><div class="empty-icon">✅</div><p>Sin pedidos pendientes</p></div></div>
+    </div>
+
+    <!-- CONTABILIDAD -->
+    <div id="page-contabilidad" class="page">
+      <div class="stat-grid" id="stats-grid"></div>
+      <div class="grid-2" style="gap:16px;">
+        <div class="card"><div class="card-title">📈 Más vendidos</div><table class="sales-table"><thead><tr><th>Producto</th><th>Uds</th><th>Ingresos</th><th>%</th></tr></thead><tbody id="top-products-body"></tbody></table></div>
+        <div class="card"><div class="card-title">🧾 Últimas ventas</div><div id="recent-sales" style="max-height:380px;overflow-y:auto;"></div></div>
+      </div>
+      <div class="card" style="margin-top:16px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+          <div class="card-title" style="margin:0;">📋 Historial completo</div>
+          <button class="btn btn-outline btn-sm" onclick="exportCSV()">⬇️ Exportar CSV</button>
+        </div>
+        <div style="overflow-x:auto;"><table class="sales-table"><thead><tr><th>#</th><th>Cliente</th><th>Origen</th><th>Pago</th><th>Productos</th><th>Total</th><th>Cambio</th><th>Hora</th></tr></thead><tbody id="full-history-body"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- SUGERENCIAS -->
+    <div id="page-sugerencias" class="page">
+      <div class="ai-header"><div style="font-size:40px;">🤖</div><div><h2 style="font-size:20px;font-weight:900;color:white;">Sugerencias Inteligentes</h2><p style="font-size:13px;color:rgba(255,255,255,.85);">Análisis semanal basado en tus ventas reales.</p></div></div>
+      <div id="ai-suggestions-container"><div style="text-align:center;padding:40px;"><div class="ai-spinner"></div><p style="color:var(--muted);">Analizando ventas...</p></div></div>
+    </div>
+
+    <!-- MENU EDITOR -->
+    <div id="page-menu-editor" class="page">
+      <div class="grid-2" style="gap:16px;">
+        <div class="card">
+          <div class="card-title">➕ Agregar / Editar Producto</div>
+          <input type="hidden" id="edit-item-id">
+          <div class="form-group"><label>Nombre</label><input type="text" class="form-control" id="item-name" placeholder="Ej: Grande 8oz"></div>
+          <div class="form-group"><label>Categoría</label><input type="text" class="form-control" id="item-category" placeholder="Helados, Toppings, Combos..."></div>
+          <div class="form-group"><label>Precio ($)</label><input type="number" class="form-control" id="item-price" placeholder="0.00" step="0.25"></div>
+          <div class="form-group"><label>Emoji (ícono)</label><input type="text" class="form-control" id="item-emoji" placeholder="🍦" maxlength="2"></div>
+          <div class="form-group"><label>Descripción corta</label><input type="text" class="form-control" id="item-desc" placeholder="Ej: 5 toppings incluidos"></div>
+          <div class="form-group">
+            <label>Imagen del producto (JPG / PNG)</label>
+            <div class="img-upload-area" onclick="document.getElementById('item-img-input').click()">
+              <img id="item-img-preview" class="img-preview" style="display:none;">
+              <div id="item-img-placeholder"><div class="upload-icon">📸</div><p>Haz clic para subir imagen<br><small>JPG o PNG recomendado</small></p></div>
+            </div>
+            <input type="file" id="item-img-input" accept="image/jpeg,image/png,image/webp" style="display:none;" onchange="handleImageUpload(event)">
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-primary" onclick="saveMenuItem()">💾 Guardar</button>
+            <button class="btn btn-outline" onclick="clearMenuForm()">✖ Cancelar</button>
+          </div>
+        </div>
+        <div class="card"><div class="card-title">📋 Productos actuales</div><div id="menu-editor-list" style="max-height:600px;overflow-y:auto;"></div></div>
+      </div>
+    </div>
+
+    <!-- REGISTER HISTORY -->
+    <div id="page-register-history" class="page">
+      <div style="margin-bottom:16px;"><h2 style="font-size:22px;font-weight:900;">📒 Historial de Caja</h2><p style="color:var(--muted);font-size:13px;">Registro de aperturas y cierres de caja</p></div>
+      <div id="register-history-list"><div class="empty"><div class="empty-icon">📒</div><p>Sin registros aún</p></div></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════ KIOSK ══════════ -->
+<div id="kiosk-screen" style="display:none;">
+  <div class="kiosk-header">
+    <div><h1>🍦 Deli Frozen — Haz tu pedido</h1><p>Selecciona tus productos y los preparamos para ti</p></div>
+    <button class="logout-btn" onclick="doLogout()">Salir</button>
+  </div>
+  <div class="kiosk-layout">
+    <div class="kiosk-menu">
+      <div class="kiosk-filter-tabs" id="kiosk-filter-tabs"></div>
+      <div class="kiosk-menu-grid" id="kiosk-menu-grid"></div>
+    </div>
+    <div class="kiosk-sidebar">
+      <div style="font-size:16px;font-weight:900;margin-bottom:4px;">🛒 Tu pedido</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:14px;">Revisa antes de enviar</div>
+      <div class="kiosk-cart-items" id="kiosk-cart-items"><div class="empty" style="padding:20px 0;"><div class="empty-icon" style="font-size:32px;">🛒</div><p style="font-size:12px;">Nada aún</p></div></div>
+      <div class="kiosk-total-box">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:13px;"><span>Items:</span><span id="kiosk-item-count">0</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:22px;font-weight:900;color:var(--tq-d);font-family:'Space Mono',monospace;"><span>TOTAL:</span><span id="kiosk-total">$0.00</span></div>
+      </div>
+      <div style="margin-top:12px;"><label style="font-size:11px;font-weight:700;color:var(--muted);display:block;margin-bottom:6px;text-transform:uppercase;">Tu nombre (opcional)</label>
+      <input type="text" class="form-control" id="kiosk-customer-name" placeholder="Ej: Carlos, Ana..."></div>
+      <button class="kiosk-send-btn" id="kiosk-send-btn" onclick="sendKioskOrder()" disabled>📲 Enviar pedido a caja</button>
+      <button class="btn btn-outline btn-full btn-sm" style="margin-top:8px;" onclick="clearKioskCart()">🗑️ Vaciar</button>
+    </div>
+  </div>
+  <div class="kiosk-success" id="kiosk-success">
+    <div class="big-emoji">🎉</div>
+    <h2>¡Pedido enviado!</h2>
+    <p id="kiosk-success-msg">Tu pedido fue enviado a caja.</p>
+    <button class="btn btn-primary btn-lg" style="margin-top:24px;background:white;color:var(--tq-d);" onclick="resetKiosk()">Hacer otro pedido</button>
+  </div>
+</div>
+
+<!-- ══════════ MODALS ══════════ -->
+
+<!-- ══════════ TOPPING SELECTOR MODAL ══════════ -->
+<div class="modal-overlay" id="topping-modal">
+  <div class="ts-modal">
+
+    <!-- Header fijo -->
+    <div class="ts-header">
+      <div class="ts-header-row">
+        <div class="ts-item-info">
+          <h3 id="ts-item-name">Mediano 6oz</h3>
+          <p id="ts-item-subtitle">Personaliza tu helado</p>
+        </div>
+        <div class="ts-header-right">
+          <span class="ts-price-tag" id="ts-item-price">$2.00</span>
+          <button class="ts-close" onclick="closeModal('topping-modal')">✕</button>
+        </div>
+      </div>
+      <!-- Steps -->
+      <div class="ts-steps">
+        <div class="ts-step active" id="step-tab-1"><span class="ts-step-num">1</span>Jaleas</div>
+        <div class="ts-step" id="step-tab-2"><span class="ts-step-num">2</span>Toppings</div>
+        <div class="ts-step" id="step-tab-3"><span class="ts-step-num">3</span>Extras</div>
+      </div>
+      <!-- Budget bar -->
+      <div class="ts-budget-bar">
+        <span class="ts-budget-label" id="ts-budget-label">Tienes 3 selecciones disponibles</span>
+        <div class="ts-budget-slots" id="ts-budget-slots"></div>
+      </div>
+    </div>
+
+    <!-- Body dinámico -->
+    <div class="ts-body" id="ts-body"></div>
+
+    <!-- Footer con total y navegación -->
+    <div class="ts-nav">
+      <button class="ts-back-btn" id="ts-back-btn" onclick="tsBack()" style="display:none;">← Atrás</button>
+      <button class="ts-next-btn" id="ts-next-btn" onclick="tsNext()">Siguiente: Toppings →</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- COBRO MODAL -->
+<div class="modal-overlay" id="cobro-modal">
+  <div class="modal">
+    <h3>💰 Registrar Pedido</h3>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:14px;">El pedido irá a <strong>Pedidos Pendientes</strong> para ser preparado y entregado.</p>
+    <div class="cobro-product-list" id="cobro-product-list"></div>
+    <div class="cobro-total-line"><span>TOTAL A COBRAR</span><span id="cobro-total-display">$0.00</span></div>
+
+    <!-- EMAIL OPCIONAL -->
+    <div class="form-group" style="margin-top:14px;">
+      <label>📧 Correo electrónico (opcional — para enviar factura)</label>
+      <input type="email" class="form-control" id="cobro-email" placeholder="cliente@correo.com">
+      <div style="font-size:11px;color:var(--muted);margin-top:4px;">Si no tiene correo, déjalo vacío</div>
+    </div>
+
+    <div class="form-group"><label>Método de pago</label>
+      <div class="pay-methods">
+        <div class="pay-method active" id="pm-efectivo" onclick="selectPayMethod('efectivo')"><div class="pm-icon">💵</div><div class="pm-label">Efectivo</div></div>
+        <div class="pay-method" id="pm-transferencia" onclick="selectPayMethod('transferencia')"><div class="pm-icon">📱</div><div class="pm-label">Transferencia</div></div>
+      </div>
+    </div>
+    <div id="efectivo-section">
+      <div class="form-group"><label>Efectivo recibido ($)</label><input type="number" class="form-control" id="cobro-cash-input" placeholder="0.00" step="0.25" oninput="calcCobroChange()"></div>
+      <div class="cobro-change-result" id="cobro-change-result"><div class="cobro-change-label">Cambio a entregar</div><div class="cobro-change-amount" id="cobro-change-amount">$0.00</div></div>
+    </div>
+    <div id="transferencia-section" style="display:none;">
+      <div style="background:var(--tq-l);border-radius:var(--rs);padding:14px;text-align:center;">
+        <div style="font-size:28px;margin-bottom:6px;">📱</div>
+        <div style="font-weight:800;font-size:15px;color:var(--tq-d);">Transferencia / Depósito</div>
+        <div style="font-size:13px;color:var(--muted);margin-top:4px;">Confirma el pago antes de finalizar</div>
+      </div>
+    </div>
+    <div class="pay-confirm-btns">
+      <button class="btn btn-success btn-full btn-lg" onclick="confirmCobro()">✅ Cobrar y poner en pedidos</button>
+      <button class="btn btn-outline" onclick="closeModal('cobro-modal')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- DELIVER MODAL — solo para marcar como entregado, pago ya fue tomado -->
+<div class="modal-overlay" id="deliver-modal">
+  <div class="modal">
+    <h3>🎉 Entregar Pedido</h3>
+    <div id="deliver-summary" style="margin-bottom:16px;"></div>
+
+    <!-- Sección de cobro: solo visible si el pedido viene del kiosko (aún no cobrado) -->
+    <div id="deliver-cobro-section" style="display:none;">
+      <div style="background:#fef3c7;border-radius:var(--rs);padding:10px 14px;margin-bottom:12px;font-size:13px;color:#92400e;font-weight:700;">⚠️ Pedido de kiosko — aún no cobrado</div>
+      <div class="form-group"><label>Método de pago</label>
+        <div class="pay-methods">
+          <div class="pay-method active" id="dpm-efectivo" onclick="selectDeliverPayMethod('efectivo')"><div class="pm-icon">💵</div><div class="pm-label">Efectivo</div></div>
+          <div class="pay-method" id="dpm-transferencia" onclick="selectDeliverPayMethod('transferencia')"><div class="pm-icon">📱</div><div class="pm-label">Transferencia</div></div>
+        </div>
+      </div>
+      <div id="deliver-efectivo-section">
+        <div class="form-group"><label>Efectivo recibido ($)</label><input type="number" class="form-control" id="deliver-cash-input" placeholder="0.00" step="0.25" oninput="calcDeliverChange()"></div>
+        <div class="cobro-change-result" id="deliver-change-result"><div class="cobro-change-label">Cambio a entregar</div><div class="cobro-change-amount" id="deliver-change-amount">$0.00</div></div>
+      </div>
+      <div id="deliver-transferencia-section" style="display:none;">
+        <div style="background:var(--tq-l);border-radius:var(--rs);padding:14px;text-align:center;"><div style="font-size:28px;margin-bottom:6px;">📱</div><div style="font-weight:800;font-size:15px;color:var(--tq-d);">Confirma la transferencia antes de entregar</div></div>
+      </div>
+      <!-- Email para kiosko -->
+      <div class="form-group">
+        <label>📧 Correo electrónico (opcional)</label>
+        <input type="email" class="form-control" id="deliver-email" placeholder="cliente@correo.com">
+      </div>
+    </div>
+
+    <!-- Ya cobrado desde caja: solo mostrar resumen de pago -->
+    <div id="deliver-paid-section">
+      <div id="deliver-paid-badge" style="background:#d1fae5;border-radius:var(--rs);padding:10px 14px;margin-bottom:12px;font-size:13px;color:#065f46;font-weight:700;">✅ Ya cobrado desde caja</div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-success btn-full btn-lg" onclick="deliverOrder()">🎉 Marcar como entregado</button>
+      <button class="btn btn-outline" onclick="closeModal('deliver-modal')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- CLOSE REGISTER MODAL -->
+<div class="modal-overlay" id="close-register-modal">
+  <div class="modal">
+    <h3>🔒 Cerrar Caja del Día</h3>
+    <div class="close-reg-summary" id="close-reg-summary"></div>
+    <div class="form-group"><label>Nombre de quien cierra</label><input type="text" class="form-control" id="closer-name" placeholder="Tu nombre"></div>
+    <div class="form-group"><label>Efectivo contado al cerrar ($)</label><input type="number" class="form-control" id="closing-amount" placeholder="0.00" step="0.50" oninput="calcClosingDiff()"></div>
+    <div id="closing-diff-box" style="display:none;background:var(--tq-l);border-radius:var(--rs);padding:12px;margin-bottom:12px;font-size:13px;"></div>
+    <div class="form-group"><label>Observaciones</label><input type="text" class="form-control" id="closing-notes" placeholder="Ej: Todo en orden..."></div>
+    <div class="modal-actions">
+      <button class="btn btn-danger btn-full" onclick="closeRegister()">🔒 Cerrar caja y finalizar día</button>
+      <button class="btn btn-outline" onclick="closeModal('close-register-modal')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════
+// USERS & AUTH
+// ══════════════════════════════════════
+const USERS={caja:{pass:'deli2025',role:'caja'},cliente:{pass:'helado',role:'cliente'}};
+let currentRole=null,loginMode='caja',currentPayMethod='efectivo',deliverPayMethod='efectivo';
+let pendingDeliverId=null, currentCobroCart=[];
+
+function setLoginMode(m,el){loginMode=m;document.querySelectorAll('.login-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');document.getElementById('login-hint').style.display=m==='caja'?'block':'none';}
+
+function doLogin(){
+  const u=document.getElementById('login-user').value.trim().toLowerCase();
+  const p=document.getElementById('login-pass').value;
+  const err=document.getElementById('login-error');
+  if(!USERS[u]||USERS[u].pass!==p){err.textContent='❌ Usuario o contraseña incorrectos.';err.style.display='block';return;}
+  if(USERS[u].role!==loginMode){err.textContent=`❌ Ese usuario no es de tipo "${loginMode}".`;err.style.display='block';return;}
+  err.style.display='none';
+  currentRole=USERS[u].role;
+  document.getElementById('login-screen').style.display='none';
+  if(currentRole==='caja'){
+    // Check if register is already open today
+    const reg=currentRegister();
+    if(reg&&reg.status==='open'){
+      showApp();
+    } else {
+      document.getElementById('open-register-screen').style.display='flex';
+    }
+  } else {
+    document.getElementById('kiosk-screen').style.display='block';
+    initKiosk();
+  }
+}
+
+function doLogout(){
+  currentRole=null;
+  ['app','kiosk-screen','open-register-screen'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('login-user').value='';
+  document.getElementById('login-pass').value='';
+}
+
+// ══════════════════════════════════════
+// STORAGE
+// ══════════════════════════════════════
+const SK={menu:'df_menu',sales:'df_sales',orders:'df_orders',kiosk:'df_kiosk_orders',registers:'df_registers'};
+function load(k,d){try{return JSON.parse(localStorage.getItem(k))||d;}catch{return d;}}
+function save(k,v){localStorage.setItem(k,JSON.stringify(v));}
+
+const DEFAULT_MENU=[
+  {id:1,name:'Cono',category:'Helados',price:1.00,emoji:'🍦',desc:'Sin topping',img:''},
+  {id:2,name:'Pequeño 4oz',category:'Helados',price:1.50,emoji:'🍧',desc:'1 topping incluido',img:''},
+  {id:3,name:'Mediano 6oz',category:'Helados',price:2.00,emoji:'🥤',desc:'3 toppings incluidos',img:''},
+  {id:4,name:'Grande 8oz',category:'Helados',price:3.50,emoji:'🏆',desc:'5 toppings incluidos',img:''},
+  {id:5,name:'Extra Grande 12oz',category:'Helados',price:4.50,emoji:'🎉',desc:'7 toppings incluidos',img:''},
+  {id:6,name:'Deli Fusión Supremo',category:'Especiales',price:2.50,emoji:'⭐',desc:'Queso + jalea salada',img:''},
+  {id:7,name:'Deli Fusión Promo',category:'Especiales',price:2.00,emoji:'🔥',desc:'Promo viernes',img:''},
+  {id:8,name:'Topping Económico',category:'Toppings',price:0.25,emoji:'✨',desc:'Pasas, coco, granola...',img:''},
+  {id:9,name:'Topping Estándar',category:'Toppings',price:0.35,emoji:'🍪',desc:'Rolillo, Oreo...',img:''},
+  {id:10,name:'Topping Frutas',category:'Toppings',price:0.35,emoji:'🍓',desc:'Guineo, piña, mango',img:''},
+  {id:11,name:'Topping Premium',category:'Toppings',price:0.50,emoji:'💎',desc:'M&M, nueces, almendras',img:''},
+  {id:12,name:'Jalea / Sirope',category:'Toppings',price:0.15,emoji:'🍯',desc:'Choco, fresa, piña, menta',img:''},
+  {id:13,name:'Combo Vecino',category:'Combos',price:5.00,emoji:'👨‍👩‍👧',desc:'3 medianos',img:''},
+  {id:14,name:'Rikokids',category:'Combos',price:1.25,emoji:'🧒',desc:'4oz especial niños',img:''},
+];
+let menu=load(SK.menu,DEFAULT_MENU);
+let sales=load(SK.sales,[]);
+let pendingOrders=load(SK.orders,[]);
+let registers=load(SK.registers,[]);
+let cart=[],kioskCart=[];
+let currentItemImg='';
+
+// ══════════════════════════════════════
+// CLOCK
+// ══════════════════════════════════════
+function updateClock(){
+  const n=new Date();
+  const cl=document.getElementById('clock'),dd=document.getElementById('date-display');
+  if(cl)cl.textContent=n.toLocaleTimeString('es-EC');
+  if(dd)dd.textContent=n.toLocaleDateString('es-EC',{weekday:'long',day:'numeric',month:'long'});
+}
+setInterval(updateClock,1000);updateClock();
+
+// ══════════════════════════════════════
+// REGISTER (CAJA APERTURA/CIERRE)
+// ══════════════════════════════════════
+function currentRegister(){
+  const today=new Date().toDateString();
+  return registers.find(r=>new Date(r.openedAt).toDateString()===today&&r.status==='open')||null;
+}
+function openRegister(){
+  const name=document.getElementById('opener-name').value.trim();
+  const amount=parseFloat(document.getElementById('opening-amount').value)||0;
+  const notes=document.getElementById('opening-notes').value.trim();
+  if(!name){showToast('⚠️ Ingresa el nombre del cajero');return;}
+  const reg={id:Date.now(),openedBy:name,openedAt:Date.now(),openingAmount:amount,openingNotes:notes,closedBy:'',closedAt:null,closingAmount:0,closingNotes:'',totalSales:0,totalOrders:0,cashSales:0,transferSales:0,status:'open'};
+  registers.push(reg);
+  save(SK.registers,registers);
+  document.getElementById('open-register-screen').style.display='none';
+  showApp();
+}
+function showApp(){
+  document.getElementById('app').style.display='block';
+  const reg=currentRegister();
+  if(reg){
+    document.getElementById('header-cashier-name').textContent=`Cajero: ${reg.openedBy} · Apertura: $${reg.openingAmount.toFixed(2)}`;
+    document.getElementById('header-user-badge').textContent=`🏪 ${reg.openedBy}`;
+  }
+  initApp();
+}
+function openCloseRegisterModal(){
+  const reg=currentRegister();
+  if(!reg){showToast('⚠️ No hay caja abierta hoy');return;}
+  const todaySales=sales.filter(s=>new Date(s.timestamp).toDateString()===new Date(reg.openedAt).toDateString());
+  const totalVentas=todaySales.reduce((s,o)=>s+o.total,0);
+  const cashSales=todaySales.filter(s=>s.payMethod==='efectivo').reduce((s,o)=>s+o.total,0);
+  const transSales=todaySales.filter(s=>s.payMethod==='transferencia').reduce((s,o)=>s+o.total,0);
+  const expectedCash=reg.openingAmount+cashSales;
+  document.getElementById('close-reg-summary').innerHTML=`
+    <div class="crs-row"><span>Cajero</span><span><strong>${reg.openedBy}</strong></span></div>
+    <div class="crs-row"><span>Apertura</span><span>${new Date(reg.openedAt).toLocaleTimeString('es-EC',{hour:'2-digit',minute:'2-digit'})}</span></div>
+    <div class="crs-row"><span>Monto apertura</span><span>$${reg.openingAmount.toFixed(2)}</span></div>
+    <div class="crs-row"><span>Total pedidos</span><span>${todaySales.length}</span></div>
+    <div class="crs-row"><span>Ventas efectivo</span><span>$${cashSales.toFixed(2)}</span></div>
+    <div class="crs-row"><span>Ventas transferencia</span><span>$${transSales.toFixed(2)}</span></div>
+    <div class="crs-total"><span>TOTAL VENTAS</span><span>$${totalVentas.toFixed(2)}</span></div>
+    <div style="font-size:12px;color:var(--muted);margin-top:8px;">Efectivo esperado en caja: <strong>$${expectedCash.toFixed(2)}</strong></div>`;
+  document.getElementById('closer-name').value=reg.openedBy;
+  document.getElementById('close-register-modal').classList.add('open');
+}
+function calcClosingDiff(){
+  const reg=currentRegister();if(!reg)return;
+  const closing=parseFloat(document.getElementById('closing-amount').value)||0;
+  const todaySales=sales.filter(s=>new Date(s.timestamp).toDateString()===new Date(reg.openedAt).toDateString());
+  const cashSales=todaySales.filter(s=>s.payMethod==='efectivo').reduce((s,o)=>s+o.total,0);
+  const expected=reg.openingAmount+cashSales;
+  const diff=closing-expected;
+  const box=document.getElementById('closing-diff-box');
+  box.style.display='block';
+  if(Math.abs(diff)<0.01){box.style.background='#d1fae5';box.innerHTML='✅ <strong>Caja cuadrada perfectamente</strong>';}
+  else if(diff>0){box.style.background='#fef3c7';box.innerHTML=`⚠️ Hay <strong>$${diff.toFixed(2)} de más</strong> en caja`;}
+  else{box.style.background='#fee2e2';box.innerHTML=`❌ Faltan <strong>$${Math.abs(diff).toFixed(2)}</strong> en caja`;}
+}
+function closeRegister(){
+  const reg=currentRegister();if(!reg)return;
+  const name=document.getElementById('closer-name').value.trim()||reg.openedBy;
+  const amount=parseFloat(document.getElementById('closing-amount').value)||0;
+  const notes=document.getElementById('closing-notes').value.trim();
+  const todaySales=sales.filter(s=>new Date(s.timestamp).toDateString()===new Date(reg.openedAt).toDateString());
+  const total=todaySales.reduce((s,o)=>s+o.total,0);
+  const cashSales=todaySales.filter(s=>s.payMethod==='efectivo').reduce((s,o)=>s+o.total,0);
+  const transSales=todaySales.filter(s=>s.payMethod==='transferencia').reduce((s,o)=>s+o.total,0);
+  const idx=registers.findIndex(r=>r.id===reg.id);
+  registers[idx]={...reg,closedBy:name,closedAt:Date.now(),closingAmount:amount,closingNotes:notes,totalSales:total,totalOrders:todaySales.length,cashSales,transferSales:transSales,status:'closed'};
+  save(SK.registers,registers);
+  closeModal('close-register-modal');
+  showToast('🔒 Caja cerrada correctamente');
+  setTimeout(()=>{doLogout();},1500);
+}
+
+// ══════════════════════════════════════
+// POLLING KIOSK ORDERS
+// ══════════════════════════════════════
+function pollKioskOrders(){
+  if(currentRole!=='caja')return;
+  const kq=load(SK.kiosk,[]);
+  if(!kq.length)return;
+  let added=0;
+  kq.forEach(ko=>{if(!pendingOrders.find(o=>o.id===ko.id)){pendingOrders.push(ko);added++;}});
+  if(added>0){save(SK.orders,pendingOrders);updatePendingCount();showToast(`📲 ${added} nuevo(s) pedido(s) del kiosko`);}
+  save(SK.kiosk,[]);
+}
+setInterval(pollKioskOrders,3000);
+
+// ══════════════════════════════════════
+// INIT APP
+// ══════════════════════════════════════
+function initApp(){renderFilterTabs();renderMenuGrid();updatePendingCount();}
+
+// ══════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════
+function showPage(p,el){
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(x=>x.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+  if(el)el.classList.add('active');
+  if(p==='contabilidad')renderContabilidad();
+  if(p==='sugerencias')renderSugerencias();
+  if(p==='menu-editor')renderMenuEditor();
+  if(p==='pending')renderPendingOrders();
+  if(p==='register-history')renderRegisterHistory();
+}
+
+// ══════════════════════════════════════
+// IMAGE UPLOAD
+// ══════════════════════════════════════
+function handleImageUpload(e){
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    currentItemImg=ev.target.result;
+    const prev=document.getElementById('item-img-preview');
+    const ph=document.getElementById('item-img-placeholder');
+    prev.src=currentItemImg;prev.style.display='block';ph.style.display='none';
+  };
+  reader.readAsDataURL(file);
+}
+
+// ══════════════════════════════════════
+// CATÁLOGO — Jaleas separadas de Toppings
+// ══════════════════════════════════════
+const JALEAS = [
+  {id:'j1', name:'Jalea Chocolate', emoji:'🍫', priceExtra:0.15},
+  {id:'j2', name:'Jalea Fresa',     emoji:'🍓', priceExtra:0.15},
+  {id:'j3', name:'Jalea Piña',      emoji:'🍍', priceExtra:0.15},
+  {id:'j4', name:'Jalea Menta',     emoji:'🌿', priceExtra:0.15},
+  {id:'j5', name:'Sirope Caramelo', emoji:'🍮', priceExtra:0.15},
+];
+
+const TOPPINGS = [
+  // Económicos ($0.25 extra)
+  {id:'tp1', name:'Pasas',          emoji:'🍇', priceExtra:0.25, cat:'Económico'},
+  {id:'tp2', name:'Coco rallado',   emoji:'🥥', priceExtra:0.25, cat:'Económico'},
+  {id:'tp3', name:'Granola',        emoji:'🌾', priceExtra:0.25, cat:'Económico'},
+  {id:'tp4', name:'Chispas negras', emoji:'🍫', priceExtra:0.25, cat:'Económico'},
+  {id:'tp5', name:'Chispas blancas',emoji:'⚪', priceExtra:0.25, cat:'Económico'},
+  // Estándar ($0.35 extra)
+  {id:'tp6', name:'Rolillo negro',  emoji:'🖤', priceExtra:0.35, cat:'Estándar'},
+  {id:'tp7', name:'Rolillo colores',emoji:'🌈', priceExtra:0.35, cat:'Estándar'},
+  {id:'tp8', name:'Oreo troceada',  emoji:'🍪', priceExtra:0.35, cat:'Estándar'},
+  // Frutas ($0.35 extra)
+  {id:'tp9', name:'Guineo',         emoji:'🍌', priceExtra:0.35, cat:'Fruta'},
+  {id:'tp10',name:'Piña',           emoji:'🍍', priceExtra:0.35, cat:'Fruta'},
+  {id:'tp11',name:'Mango',          emoji:'🥭', priceExtra:0.35, cat:'Fruta'},
+  // Premium ($0.50 extra)
+  {id:'tp12',name:'Frutilla',       emoji:'🍓', priceExtra:0.50, cat:'Premium'},
+  {id:'tp13',name:'Durazno',        emoji:'🍑', priceExtra:0.50, cat:'Premium'},
+  {id:'tp14',name:'M&M pequeño',    emoji:'🟡', priceExtra:0.50, cat:'Premium'},
+  {id:'tp15',name:'M&M grande',     emoji:'🔴', priceExtra:0.50, cat:'Premium'},
+  {id:'tp16',name:'Nueces',         emoji:'🥜', priceExtra:0.50, cat:'Premium'},
+  {id:'tp17',name:'Almendras',      emoji:'🤎', priceExtra:0.50, cat:'Premium'},
+  {id:'tp18',name:'Oreo entera',    emoji:'🍪', priceExtra:0.50, cat:'Premium'},
+];
+
+// Cuántos slots incluidos tiene cada producto del menú
+const ITEM_INCLUDED = {1:0, 2:1, 3:3, 4:5, 5:7, 6:0, 7:0};
+
+// Estado del modal
+let tsItem = null;       // item del menú
+let tsIncluded = 0;      // slots totales incluidos
+let tsStep = 1;          // paso actual: 1=jaleas, 2=toppings, 3=extras
+let tsJaleas = [];       // ids de jaleas elegidas (incluidas)
+let tsToppings = [];     // ids de toppings elegidos (incluidos)
+let tsExtras = [];       // [{type:'jalea'|'topping', id, price}] — pagos extra
+
+function slotsUsed() { return tsJaleas.length + tsToppings.length; }
+function slotsLeft()  { return Math.max(0, tsIncluded - slotsUsed()); }
+
+// ══════════════════════════════════════
+// MENU RENDERING
+// ══════════════════════════════════════
+function getMenuItemHTML(item) {
+  const inc = ITEM_INCLUDED[item.id] ?? null;
+  const isMasVendido = item.id === 3;
+  return `
+    <div class="menu-item" onclick="openToppingModal(${item.id})">
+      <div class="menu-item-img-wrap">
+        ${item.img
+          ? `<img src="${item.img}" alt="${item.name}">`
+          : `<div class="menu-item-img-placeholder">${item.emoji}</div>`}
+        ${isMasVendido ? '<div class="menu-item-badge">⭐ MÁS VENDIDO</div>' : ''}
+      </div>
+      <div class="menu-item-body">
+        <div class="item-name">${item.name}</div>
+        <div class="item-price">$${item.price.toFixed(2)}</div>
+        ${inc > 0
+          ? `<div class="item-toppings-tag">🍬 ${inc} incluido${inc>1?'s':''}</div>`
+          : `<div class="item-desc-small">${item.desc||'Solo helado'}</div>`}
+      </div>
+    </div>`;
+}
+function renderMenuGrid(filter='all'){
+  const g=document.getElementById('menu-grid');if(!g)return;
+  const items=filter==='all'?menu:menu.filter(i=>i.category===filter);
+  g.innerHTML=items.map(i=>getMenuItemHTML(i)).join('');
+}
+function renderFilterTabs(){
+  const cats=['all',...new Set(menu.map(i=>i.category))];
+  const t=document.getElementById('menu-filter-tabs');if(!t)return;
+  t.innerHTML=cats.map((c,idx)=>`<div class="filter-tab ${idx===0?'active':''}" onclick="filterMenuCat('${c}',this)">${c==='all'?'Todos':c}</div>`).join('');
+}
+function filterMenuCat(cat,el){
+  document.querySelectorAll('#menu-filter-tabs .filter-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');renderMenuGrid(cat);
+}
+
+// ══════════════════════════════════════
+// ABRIR MODAL
+// ══════════════════════════════════════
+function openToppingModal(itemId) {
+  const item = menu.find(i=>i.id===itemId);
+  if(!item) return;
+  if(item.category === 'Toppings') { addToCartDirect(item); return; }
+
+  tsItem     = item;
+  tsIncluded = ITEM_INCLUDED[item.id] ?? 0;
+  tsStep     = 1;
+  tsJaleas   = [];
+  tsToppings = [];
+  tsExtras   = [];
+
+  document.getElementById('ts-item-name').textContent  = item.name;
+  document.getElementById('ts-item-price').textContent = '$'+item.price.toFixed(2);
+
+  updateBudgetBar();
+  renderStep();
+  document.getElementById('topping-modal').classList.add('open');
+}
+
+// ══════════════════════════════════════
+// BUDGET BAR
+// ══════════════════════════════════════
+function updateBudgetBar() {
+  const used  = slotsUsed();
+  const total = tsIncluded;
+  const left  = slotsLeft();
+
+  // Label
+  const lbl = document.getElementById('ts-budget-label');
+  if(total === 0) {
+    lbl.textContent = 'Sin toppings incluidos';
+  } else {
+    lbl.textContent = left > 0
+      ? `${left} selección${left>1?'es':''} disponible${left>1?'s':''} de ${total}`
+      : `✅ ${total} selecciones usadas`;
+  }
+
+  // Slots visuales
+  const slots = document.getElementById('ts-budget-slots');
+  slots.innerHTML = Array.from({length: total}, (_,i) => {
+    const isJalea  = i < tsJaleas.length;
+    const isTopping= i >= tsJaleas.length && i < used;
+    const cls = isJalea ? 'ts-slot filled-jalea' : isTopping ? 'ts-slot filled' : 'ts-slot';
+    return `<div class="${cls}" title="${isJalea?'Jalea':isTopping?'Topping':'Libre'}"></div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════
+// RENDER POR PASO
+// ══════════════════════════════════════
+function renderStep() {
+  // Step tabs
+  [1,2,3].forEach(n=>{
+    const t = document.getElementById(`step-tab-${n}`);
+    t.className = 'ts-step' + (n===tsStep?' active': n<tsStep?' done':'');
+  });
+
+  // Back / Next buttons
+  const back = document.getElementById('ts-back-btn');
+  const next = document.getElementById('ts-next-btn');
+  back.style.display = tsStep > 1 ? 'block' : 'none';
+
+  const subtitle = document.getElementById('ts-item-subtitle');
+
+  if(tsStep === 1) {
+    subtitle.textContent = tsIncluded > 0
+      ? `Elige una jalea — cuenta como 1 de tus ${tsIncluded} incluidos`
+      : 'Jaleas disponibles (costo extra)';
+    next.textContent = 'Siguiente: Toppings →';
+    renderStepJaleas();
+  } else if(tsStep === 2) {
+    const left = slotsLeft();
+    subtitle.textContent = left > 0
+      ? `Elige hasta ${left} topping${left>1?'s':''} incluido${left>1?'s':''}`
+      : 'Toppings incluidos completados';
+    next.textContent = 'Siguiente: Extras →';
+    renderStepToppings();
+  } else {
+    subtitle.textContent = 'Agrega extras por precio adicional (opcional)';
+    next.textContent = '🛒 Agregar al pedido';
+    renderStepExtras();
+  }
+}
+
+function renderStepJaleas() {
+  const left = slotsLeft();
+  const body = document.getElementById('ts-body');
+  let html = '';
+
+  if(tsIncluded > 0 && left > 0) {
+    html += `<div class="ts-info-box">🍯 Elige <strong>1 jalea incluida</strong> (resta 1 de tus ${tsIncluded} selecciones). Si no quieres ninguna, continúa.</div>`;
+  } else if(tsIncluded > 0 && left === 0) {
+    html += `<div class="ts-info-box warn">⚠️ Ya usaste todas tus selecciones incluidas. Las jaleas de aquí tendrán costo extra.</div>`;
+  } else {
+    html += `<div class="ts-info-box">Este helado no incluye toppings. Las jaleas tienen costo extra.</div>`;
+  }
+
+  html += `<div class="ts-sec"><div class="ts-sec-title">🍯 Jaleas y Siropes</div><div class="ts-chip-grid">`;
+  JALEAS.forEach(j => {
+    const isIncluded = tsJaleas.includes(j.id) && !tsExtras.find(e=>e.id===j.id&&e.type==='jalea');
+    const isExtra    = tsExtras.find(e=>e.id===j.id&&e.type==='jalea');
+    const cls = isIncluded ? 'ts-chip active-jalea' : isExtra ? 'ts-chip active-extra' : 'ts-chip';
+    const priceLabel = (tsIncluded > 0 && left > 0 && !isIncluded && !isExtra) ? 'Incluida' : `+$${j.priceExtra.toFixed(2)}`;
+    html += `<div class="${cls}" id="jchip-${j.id}" onclick="toggleJalea('${j.id}')">
+      <div class="ch-check"></div>
+      <span class="ch-emoji">${j.emoji}</span>
+      <span class="ch-name">${j.name}</span>
+      <span class="ch-price">${priceLabel}</span>
+    </div>`;
+  });
+  html += `</div></div>`;
+  body.innerHTML = html;
+}
+
+function renderStepToppings() {
+  const left = slotsLeft();
+  const body = document.getElementById('ts-body');
+  const cats = ['Económico','Estándar','Fruta','Premium'];
+  const catLabel = {Económico:'✨ Económicos', Estándar:'🍪 Estándar', Fruta:'🍓 Frutas', Premium:'💎 Premium'};
+
+  let html = '';
+  if(left > 0) {
+    html += `<div class="ts-info-box">🍬 Puedes elegir hasta <strong>${left} topping${left>1?'s':''} gratis</strong>. Jaleas elegidas en el paso anterior ya restan de tu cupo.</div>`;
+  } else if(tsIncluded > 0) {
+    html += `<div class="ts-info-box warn">✅ Ya usaste todas tus selecciones incluidas. Puedes agregar más en el siguiente paso con costo adicional.</div>`;
+  } else {
+    html += `<div class="ts-info-box">Elige tus toppings. Todos tienen costo extra.</div>`;
+  }
+
+  cats.forEach(cat => {
+    const items = TOPPINGS.filter(t=>t.cat===cat);
+    html += `<div class="ts-sec"><div class="ts-cat-label">${catLabel[cat]} · +$${items[0].priceExtra.toFixed(2)} extra</div><div class="ts-chip-grid">`;
+    items.forEach(tp => {
+      const isIncluded = tsToppings.includes(tp.id);
+      const cls = isIncluded ? 'ts-chip active-topping' : 'ts-chip';
+      const priceLabel = (left > 0 && !isIncluded) ? 'Incluido' : `+$${tp.priceExtra.toFixed(2)}`;
+      html += `<div class="${cls}" id="tpchip-${tp.id}" onclick="toggleToppingIncluded('${tp.id}',${tp.priceExtra})">
+        <div class="ch-check"></div>
+        <span class="ch-emoji">${tp.emoji}</span>
+        <span class="ch-name">${tp.name}</span>
+        <span class="ch-price">${priceLabel}</span>
+      </div>`;
+    });
+    html += `</div></div>`;
+  });
+  body.innerHTML = html;
+}
+
+function renderStepExtras() {
+  const body = document.getElementById('ts-body');
+  const extraCost = calcExtraCost();
+  const total = tsItem.price + extraCost;
+  let html = `<div class="ts-info-box">➕ Agrega jaleas o toppings adicionales por precio extra. Todos los seleccionados aquí se cobran aparte.</div>`;
+  html += `<div class="ts-footer-total"><span>Total hasta ahora:</span><span>$${total.toFixed(2)}</span></div>`;
+
+  // Extras jaleas
+  html += `<div class="ts-sec"><div class="ts-sec-title">🍯 Jaleas extra</div><div class="ts-chip-grid">`;
+  JALEAS.forEach(j => {
+    const isExtra = tsExtras.find(e=>e.id===j.id&&e.type==='jalea');
+    const cls = isExtra ? 'ts-chip active-extra' : 'ts-chip';
+    html += `<div class="${cls}" id="extraj-${j.id}" onclick="toggleExtra('${j.id}','jalea',${j.priceExtra})">
+      <div class="ch-check"></div>
+      <span class="ch-emoji">${j.emoji}</span>
+      <span class="ch-name">${j.name}</span>
+      <span class="ch-price">+$${j.priceExtra.toFixed(2)}</span>
+    </div>`;
+  });
+  html += `</div></div>`;
+
+  // Extras toppings por categoría
+  const cats = ['Económico','Estándar','Fruta','Premium'];
+  const catLabel = {Económico:'✨ Económicos (+$0.25)', Estándar:'🍪 Estándar (+$0.35)', Fruta:'🍓 Frutas (+$0.35)', Premium:'💎 Premium (+$0.50)'};
+  cats.forEach(cat => {
+    const items = TOPPINGS.filter(t=>t.cat===cat);
+    html += `<div class="ts-sec"><div class="ts-cat-label">${catLabel[cat]}</div><div class="ts-chip-grid">`;
+    items.forEach(tp => {
+      const isExtra = tsExtras.find(e=>e.id===tp.id&&e.type==='topping');
+      const cls = isExtra ? 'ts-chip active-extra' : 'ts-chip';
+      html += `<div class="${cls}" id="extrat-${tp.id}" onclick="toggleExtra('${tp.id}','topping',${tp.priceExtra})">
+        <div class="ch-check"></div>
+        <span class="ch-emoji">${tp.emoji}</span>
+        <span class="ch-name">${tp.name}</span>
+        <span class="ch-price">+$${tp.priceExtra.toFixed(2)}</span>
+      </div>`;
+    });
+    html += `</div></div>`;
+  });
+  body.innerHTML = html;
+}
+
+// ══════════════════════════════════════
+// TOGGLE HANDLERS
+// ══════════════════════════════════════
+function toggleJalea(id) {
+  const alreadyIncluded = tsJaleas.includes(id);
+  if(alreadyIncluded) {
+    tsJaleas = tsJaleas.filter(x=>x!==id);
+  } else {
+    if(slotsLeft() > 0) {
+      // Incluida gratis — máximo 1 jalea incluida
+      if(tsJaleas.length >= 1) {
+        // reemplaza la anterior incluida
+        tsJaleas = [id];
+        showToast('🍯 Jalea reemplazada');
+      } else {
+        tsJaleas.push(id);
+      }
+    } else {
+      showToast('⚠️ Sin slots disponibles. Agrégala como extra en el paso 3.');
+      return;
+    }
+  }
+  updateBudgetBar();
+  renderStepJaleas();
+}
+
+function toggleToppingIncluded(id, price) {
+  const already = tsToppings.includes(id);
+  if(already) {
+    tsToppings = tsToppings.filter(x=>x!==id);
+  } else {
+    if(slotsLeft() > 0) {
+      tsToppings.push(id);
+    } else {
+      showToast('⚠️ Sin slots disponibles. Agrégalo como extra en el paso 3.');
+      return;
+    }
+  }
+  updateBudgetBar();
+  renderStepToppings();
+}
+
+function toggleExtra(id, type, price) {
+  const already = tsExtras.find(e=>e.id===id&&e.type===type);
+  if(already) {
+    tsExtras = tsExtras.filter(e=>!(e.id===id&&e.type===type));
+  } else {
+    tsExtras.push({id, type, price});
+  }
+  renderStepExtras();
+}
+
+// ══════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════
+function tsBack() {
+  if(tsStep > 1) { tsStep--; renderStep(); }
+}
+function tsNext() {
+  if(tsStep < 3) { tsStep++; renderStep(); }
+  else { confirmToppingSelection(); }
+}
+
+// ══════════════════════════════════════
+// CÁLCULO Y CONFIRMACIÓN
+// ══════════════════════════════════════
+function calcExtraCost() {
+  return tsExtras.reduce((s,e)=>s+e.price, 0);
+}
+
+function confirmToppingSelection() {
+  if(!tsItem) return;
+  const extraCost = calcExtraCost();
+  const finalPrice = tsItem.price + extraCost;
+
+  // Construir nota legible
+  const jaleaNames = tsJaleas.map(id=>JALEAS.find(j=>j.id===id)?.name||'').filter(Boolean);
+  const tpNames    = tsToppings.map(id=>TOPPINGS.find(t=>t.id===id)?.name||'').filter(Boolean);
+  const extraNames = tsExtras.map(e=>{
+    const found = e.type==='jalea'
+      ? JALEAS.find(j=>j.id===e.id)
+      : TOPPINGS.find(t=>t.id===e.id);
+    return found ? `${found.name}(+$${e.price.toFixed(2)})` : '';
+  }).filter(Boolean);
+
+  const parts = [];
+  if(jaleaNames.length) parts.push(`Jalea: ${jaleaNames.join(', ')}`);
+  if(tpNames.length)    parts.push(tpNames.join(', '));
+  if(extraNames.length) parts.push(`+Extra: ${extraNames.join(', ')}`);
+  const toppingNote = parts.join(' · ') || 'Sin personalizar';
+
+  const cartItem = {
+    ...tsItem,
+    qty: 1,
+    price: finalPrice,
+    basePrice: tsItem.price,
+    toppingNote,
+    toppingsData: { jaleas: [...tsJaleas], toppings: [...tsToppings], extras: [...tsExtras] },
+    _key: `${tsItem.id}_${toppingNote}`,
+  };
+
+  const existing = cart.find(c=>c._key===cartItem._key);
+  if(existing) existing.qty++;
+  else cart.push(cartItem);
+
+  closeModal('topping-modal');
+  renderCart();
+  showToast(`✅ ${tsItem.name} agregado`);
+  tsItem=null; tsJaleas=[]; tsToppings=[]; tsExtras=[];
+}
+
+// Agregar directo sin selector
+function addToCartDirect(item) {
+  const key = `${item.id}_direct`;
+  const ex=cart.find(c=>c._key===key);
+  if(ex) ex.qty++;
+  else cart.push({...item, qty:1, price:item.price, toppingNote:'', toppingsData:null, _key:key});
+  renderCart(); showToast('✅ '+item.name);
+}
+
+// ══════════════════════════════════════
+// CART
+// ══════════════════════════════════════
+function updateQty(cartKey, d){
+  const idx = cart.findIndex(c=>c._key===cartKey);
+  if(idx===-1) return;
+  cart[idx].qty += d;
+  if(cart[idx].qty <= 0) cart.splice(idx,1);
+  renderCart();
+}
+function clearCart(){
+  cart=[];
+  document.getElementById('customer-name').value='';
+  renderCart();
+}
+function getThumbEl(item){
+  if(item.img) return `<img src="${item.img}" class="cart-item-thumb">`;
+  return `<div class="cart-item-thumb">${item.emoji}</div>`;
+}
+function renderCart(){
+  const c=document.getElementById('cart-items'), ts=document.getElementById('cart-total-section');
+  if(!cart.length){
+    c.innerHTML='<div class="empty"><div class="empty-icon">🛒</div><p>Agrega productos</p></div>';
+    ts.style.display='none'; return;
+  }
+  c.innerHTML = cart.map(i => `
+    <div class="cart-item">
+      ${getThumbEl(i)}
+      <div class="cart-item-name" style="flex:1;">
+        <div>${i.name}</div>
+        ${i.toppingNote ? `<div style="font-size:10px;color:var(--muted);margin-top:1px;line-height:1.3;">${i.toppingNote}</div>` : ''}
+      </div>
+      <div style="display:flex;align-items:center;gap:5px;">
+        <button class="qty-btn" onclick="updateQty('${i._key}',-1)">−</button>
+        <span style="font-weight:800;min-width:16px;text-align:center;">${i.qty}</span>
+        <button class="qty-btn" onclick="updateQty('${i._key}',1)">+</button>
+      </div>
+      <div class="cart-item-price">$${(i.price*i.qty).toFixed(2)}</div>
+    </div>`).join('');
+  ts.style.display='block';
+  document.getElementById('total').textContent='$'+cart.reduce((s,i)=>s+i.price*i.qty,0).toFixed(2);
+}
+
+// ══════════════════════════════════════
+// COBRO MODAL
+// ══════════════════════════════════════
+function openCobroModal(){
+  if(!cart.length){showToast('⚠️ Pedido vacío');return;}
+  currentCobroCart=[...cart];
+  const total=currentCobroCart.reduce((s,i)=>s+i.price*i.qty,0);
+  document.getElementById('cobro-product-list').innerHTML=currentCobroCart.map(i=>`
+    <div class="cobro-product-item">
+      <span>${i.qty}× ${i.name}</span>
+      <span><strong>$${(i.price*i.qty).toFixed(2)}</strong></span>
+    </div>`).join('');
+  document.getElementById('cobro-total-display').textContent='$'+total.toFixed(2);
+  document.getElementById('cobro-cash-input').value='';
+  document.getElementById('cobro-email').value='';
+  document.getElementById('cobro-change-amount').textContent='$0.00';
+  document.getElementById('cobro-change-result').className='cobro-change-result';
+  selectPayMethod('efectivo');
+  document.getElementById('cobro-modal').classList.add('open');
+}
+function selectPayMethod(m){
+  currentPayMethod=m;
+  document.getElementById('pm-efectivo').className='pay-method'+(m==='efectivo'?' active':'');
+  document.getElementById('pm-transferencia').className='pay-method'+(m==='transferencia'?' active':'');
+  document.getElementById('efectivo-section').style.display=m==='efectivo'?'block':'none';
+  document.getElementById('transferencia-section').style.display=m==='transferencia'?'block':'none';
+}
+function calcCobroChange(){
+  const total=currentCobroCart.reduce((s,i)=>s+i.price*i.qty,0);
+  const cash=parseFloat(document.getElementById('cobro-cash-input').value)||0;
+  const ch=cash-total;
+  const el=document.getElementById('cobro-change-amount'),box=document.getElementById('cobro-change-result');
+  if(ch<0){el.textContent='Falta $'+Math.abs(ch).toFixed(2);box.className='cobro-change-result insuficiente';}
+  else{el.textContent='$'+ch.toFixed(2);box.className='cobro-change-result';}
+}
+function confirmCobro(){
+  if(currentPayMethod==='efectivo'){
+    const total=currentCobroCart.reduce((s,i)=>s+i.price*i.qty,0);
+    const cash=parseFloat(document.getElementById('cobro-cash-input').value)||0;
+    if(cash<total){showToast('❌ Efectivo insuficiente');return;}
+  }
+  const name=document.getElementById('customer-name').value.trim()||'Sin nombre';
+  const email=document.getElementById('cobro-email').value.trim();
+  const total=currentCobroCart.reduce((s,i)=>s+i.price*i.qty,0);
+  const cash=currentPayMethod==='efectivo'?(parseFloat(document.getElementById('cobro-cash-input').value)||0):total;
+  const change=currentPayMethod==='efectivo'?Math.max(0,cash-total):0;
+  // ✅ FIX: va a pendingOrders como "cobrado pero pendiente de entrega"
+  const order={
+    id:Date.now(),
+    orderNum:'V-'+String(pendingOrders.length+sales.length+1).padStart(3,'0'),
+    customer:name,
+    email:email,
+    items:[...currentCobroCart],
+    total,cash,change,
+    payMethod:currentPayMethod,
+    paid:true,  // ya fue cobrado en caja
+    time:new Date().toLocaleTimeString('es-EC',{hour:'2-digit',minute:'2-digit'}),
+    timestamp:Date.now(),
+    status:'pending',
+    source:'caja'
+  };
+  pendingOrders.push(order);
+  save(SK.orders,pendingOrders);
+  closeModal('cobro-modal');
+  clearCart();
+  updatePendingCount();
+  // Mostrar cambio en toast si aplica
+  if(currentPayMethod==='efectivo'&&change>0){
+    showToast(`✅ Cobrado $${total.toFixed(2)} · Cambio: $${change.toFixed(2)}`);
+  } else {
+    showToast(`✅ ${name} cobrado — pendiente de entrega`);
+  }
+  // Si el cliente dio correo, mostrar nota
+  if(email) showToast(`📧 Factura se enviará a ${email}`);
+}
+
+// ══════════════════════════════════════
+// PENDING ORDERS
+// ══════════════════════════════════════
+function updatePendingCount(){
+  const el=document.getElementById('pending-count');
+  if(el)el.textContent=pendingOrders.length;
+}
+function renderPendingOrders(){
+  const g=document.getElementById('pending-orders-grid');if(!g)return;
+  if(!pendingOrders.length){g.innerHTML='<div class="empty"><div class="empty-icon">✅</div><p>Sin pedidos pendientes</p></div>';return;}
+  g.innerHTML=`<div class="pending-grid">${pendingOrders.map(o=>`
+    <div class="pending-card ${o.source==='kiosk'?'from-kiosk':''}" onclick="openDeliverModal(${o.id})">
+      ${o.source==='kiosk'?'<div class="kiosk-tag">🛍️ Kiosko</div>':''}
+      <div class="order-num">${o.orderNum||'#'} · ${o.time||''}</div>
+      <div class="client-name">${o.customer}</div>
+      <div class="order-items">${o.items.map(i=>`${i.qty}× ${i.name}`).join('<br>')}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;flex-wrap:wrap;gap:4px;">
+        <div class="order-total">$${o.total.toFixed(2)}</div>
+        ${o.paid
+          ?`<span class="badge badge-green">✅ ${o.payMethod==='transferencia'?'📱':'💵'} Cobrado</span>`
+          :`<span class="badge badge-warn pulse">⏳ Sin cobrar</span>`}
+      </div>
+      ${o.email?`<div style="font-size:11px;color:var(--muted);margin-top:4px;">📧 ${o.email}</div>`:''}
+      ${o.paid&&o.change>0?`<div style="font-size:11px;color:var(--ok);margin-top:2px;font-weight:700;">Cambio: $${o.change.toFixed(2)}</div>`:''}
+    </div>`).join('')}</div>`;
+}
+
+// Simula envío de correo — en producción conectar a EmailJS o similar
+function simulateEmailReceipt(order){
+  if(!order.email) return;
+  const subject=encodeURIComponent(`Factura Deli Frozen — Pedido ${order.orderNum}`);
+  const items=order.items.map(i=>`${i.qty}x ${i.name}: $${(i.price*i.qty).toFixed(2)}`).join('%0A');
+  const body=encodeURIComponent(
+    `Hola ${order.customer}!\n\nGracias por tu compra en Deli Frozen - Mata de Cacao.\n\n` +
+    `--- DETALLE DE TU PEDIDO ---\n`
+  )+items+encodeURIComponent(
+    `\n\nTOTAL: $${order.total.toFixed(2)}\nPago: ${order.payMethod==='transferencia'?'Transferencia':'Efectivo'}\n` +
+    (order.change>0?`Cambio: $${order.change.toFixed(2)}\n`:'')+
+    `\nFecha: ${new Date(order.timestamp).toLocaleString('es-EC')}\n\n` +
+    `¡Vuelve pronto! 🍦\nDeli Frozen - Mata de Cacao, Babahoyo`
+  );
+  // Abre el cliente de correo del dispositivo con la factura pre-llenada
+  window.open(`mailto:${order.email}?subject=${subject}&body=${body}`,'_blank');
+}
+function selectDeliverPayMethod(m){
+  deliverPayMethod=m;
+  document.getElementById('dpm-efectivo').className='pay-method'+(m==='efectivo'?' active':'');
+  document.getElementById('dpm-transferencia').className='pay-method'+(m==='transferencia'?' active':'');
+  document.getElementById('deliver-efectivo-section').style.display=m==='efectivo'?'block':'none';
+  document.getElementById('deliver-transferencia-section').style.display=m==='transferencia'?'block':'none';
+}
+function calcDeliverChange(){
+  const o=pendingOrders.find(x=>x.id===pendingDeliverId);if(!o)return;
+  const cash=parseFloat(document.getElementById('deliver-cash-input').value)||0;
+  const ch=cash-o.total;
+  const el=document.getElementById('deliver-change-amount'),box=document.getElementById('deliver-change-result');
+  if(ch<0){el.textContent='Falta $'+Math.abs(ch).toFixed(2);box.className='cobro-change-result insuficiente';}
+  else{el.textContent='$'+ch.toFixed(2);box.className='cobro-change-result';}
+}
+function openDeliverModal(id){
+  pendingDeliverId=id;
+  const o=pendingOrders.find(x=>x.id===id);if(!o)return;
+
+  // Build product list
+  const productLines=o.items.map(i=>`
+    <div style="display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid var(--border);">
+      <span>${i.qty}× ${i.name}</span><strong>$${(i.price*i.qty).toFixed(2)}</strong>
+    </div>`).join('');
+
+  const payBadge=o.paid
+    ?`<span class="badge badge-green">✅ Ya cobrado · ${o.payMethod==='transferencia'?'📱 Transferencia':'💵 Efectivo'}</span>`
+    :`<span class="badge badge-warn">⏳ Pendiente de cobro</span>`;
+
+  document.getElementById('deliver-summary').innerHTML=`
+    <div style="background:var(--bg);border-radius:var(--rs);padding:14px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <div style="font-size:17px;font-weight:900;">👤 ${o.customer} ${o.source==='kiosk'?'<span class="badge badge-pink">🛍️ Kiosko</span>':''}</div>
+        ${payBadge}
+      </div>
+      ${productLines}
+      <div style="display:flex;justify-content:space-between;font-size:18px;font-weight:900;color:var(--tq-d);padding-top:10px;font-family:Space Mono,monospace;">
+        <span>TOTAL</span><span>$${o.total.toFixed(2)}</span>
+      </div>
+      ${o.paid&&o.change>0?`<div style="font-size:13px;color:var(--ok);margin-top:4px;font-weight:700;">🔄 Cambio entregado: $${o.change.toFixed(2)}</div>`:''}
+      ${o.email?`<div style="font-size:12px;color:var(--muted);margin-top:4px;">📧 ${o.email}</div>`:''}
+    </div>`;
+
+  // Show/hide cobro section based on whether already paid
+  const cobroSec=document.getElementById('deliver-cobro-section');
+  const paidSec=document.getElementById('deliver-paid-section');
+  if(o.paid){
+    // Already paid from caja — just deliver
+    cobroSec.style.display='none';
+    paidSec.style.display='block';
+    document.getElementById('deliver-paid-badge').textContent=`✅ Pago recibido en caja (${o.payMethod==='transferencia'?'📱 Transferencia':'💵 Efectivo'})`;
+  } else {
+    // Kiosk order — still needs payment
+    cobroSec.style.display='block';
+    paidSec.style.display='none';
+    document.getElementById('deliver-cash-input').value='';
+    document.getElementById('deliver-change-amount').textContent='$0.00';
+    document.getElementById('deliver-change-result').className='cobro-change-result';
+    document.getElementById('deliver-email').value=o.email||'';
+    selectDeliverPayMethod('efectivo');
+  }
+  document.getElementById('deliver-modal').classList.add('open');
+}
+
+function deliverOrder(){
+  const idx=pendingOrders.findIndex(o=>o.id===pendingDeliverId);if(idx===-1)return;
+  const o=pendingOrders[idx];
+
+  let finalOrder={...o};
+
+  if(!o.paid){
+    // Kiosk order: need to collect payment now
+    if(deliverPayMethod==='efectivo'){
+      const cash=parseFloat(document.getElementById('deliver-cash-input').value)||0;
+      if(cash<o.total){showToast('❌ Efectivo insuficiente');return;}
+      finalOrder.cash=cash;
+      finalOrder.change=Math.max(0,cash-o.total);
+    }
+    finalOrder.payMethod=deliverPayMethod;
+    finalOrder.paid=true;
+    const emailVal=document.getElementById('deliver-email').value.trim();
+    if(emailVal) finalOrder.email=emailVal;
+  }
+
+  finalOrder.status='delivered';
+  finalOrder.deliveredAt=Date.now();
+
+  pendingOrders.splice(idx,1);
+  sales.push(finalOrder);
+  save(SK.orders,pendingOrders);
+  save(SK.sales,sales);
+  closeModal('deliver-modal');
+  renderPendingOrders();
+  updatePendingCount();
+
+  if(finalOrder.email){
+    showToast(`🎉 Entregado · 📧 Factura a ${finalOrder.email}`);
+    // Simulate email (in real deployment, connect to email service)
+    simulateEmailReceipt(finalOrder);
+  } else {
+    showToast('🎉 Pedido de '+finalOrder.customer+' entregado');
+  }
+}
+
+// ══════════════════════════════════════
+// CONTABILIDAD
+// ══════════════════════════════════════
+function renderContabilidad(){
+  const today=new Date().toDateString();
+  const ts=sales.filter(s=>new Date(s.timestamp).toDateString()===today);
+  const totalH=ts.reduce((s,o)=>s+o.total,0);
+  const totalG=sales.reduce((s,o)=>s+o.total,0);
+  const ticket=sales.length?totalG/sales.length:0;
+  const cashH=ts.filter(s=>s.payMethod==='efectivo').reduce((s,o)=>s+o.total,0);
+  const transH=ts.filter(s=>s.payMethod==='transferencia').reduce((s,o)=>s+o.total,0);
+  document.getElementById('stats-grid').innerHTML=`
+    <div class="stat-card"><div class="stat-icon">💰</div><div class="stat-value">$${totalH.toFixed(2)}</div><div class="stat-label">Ventas hoy</div></div>
+    <div class="stat-card"><div class="stat-icon">💵</div><div class="stat-value">$${cashH.toFixed(2)}</div><div class="stat-label">Efectivo hoy</div></div>
+    <div class="stat-card"><div class="stat-icon">📱</div><div class="stat-value">$${transH.toFixed(2)}</div><div class="stat-label">Transferencias hoy</div></div>
+    <div class="stat-card"><div class="stat-icon">🏆</div><div class="stat-value">$${totalG.toFixed(2)}</div><div class="stat-label">Total histórico</div></div>
+    <div class="stat-card"><div class="stat-icon">🎯</div><div class="stat-value">$${ticket.toFixed(2)}</div><div class="stat-label">Ticket promedio</div></div>
+    <div class="stat-card"><div class="stat-icon">🧾</div><div class="stat-value">${sales.length}</div><div class="stat-label">Ventas totales</div></div>`;
+  const pc={},pr={};
+  sales.forEach(o=>o.items.forEach(i=>{pc[i.name]=(pc[i.name]||0)+i.qty;pr[i.name]=(pr[i.name]||0)+i.price*i.qty;}));
+  const sorted=Object.entries(pc).sort((a,b)=>b[1]-a[1]);
+  const mx=sorted[0]?.[1]||1;
+  document.getElementById('top-products-body').innerHTML=sorted.slice(0,8).map(([n,c])=>`
+    <tr><td><strong>${n}</strong></td><td>${c}</td><td>$${(pr[n]||0).toFixed(2)}</td>
+    <td><div class="bar-wrap"><div class="bar-track"><div class="bar-fill" style="width:${(c/mx*100).toFixed(0)}%"></div></div><span style="font-size:11px;color:var(--muted)">${(c/mx*100).toFixed(0)}%</span></div></td></tr>`)
+    .join('')||'<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:20px;">Sin ventas</td></tr>';
+  document.getElementById('recent-sales').innerHTML=[...sales].reverse().slice(0,10).map(o=>`
+    <div style="padding:10px;border-bottom:1px solid var(--border);">
+      <div style="display:flex;justify-content:space-between;">
+        <strong style="font-size:13px;">${o.customer} ${o.source==='kiosk'?'🛍️':''}</strong>
+        <span style="font-family:Space Mono,monospace;font-size:13px;font-weight:700;color:var(--tq-d);">$${o.total.toFixed(2)}</span>
+      </div>
+      <div style="font-size:11px;color:var(--muted);">${o.items.map(i=>`${i.qty}×${i.name}`).join(', ')} · ${o.payMethod==='efectivo'?'💵':'📱'} ${o.time||''}</div>
+    </div>`).join('')||'<div class="empty"><p>Sin ventas aún</p></div>';
+  document.getElementById('full-history-body').innerHTML=[...sales].reverse().map((o,i)=>`
+    <tr>
+      <td>${o.orderNum||i+1}</td><td><strong>${o.customer}</strong></td>
+      <td><span class="badge ${o.source==='kiosk'?'badge-pink':'badge-teal'}">${o.source==='kiosk'?'🛍️ Kiosko':'🏪 Caja'}</span></td>
+      <td><span class="badge ${o.payMethod==='transferencia'?'badge-purple':'badge-green'}">${o.payMethod==='transferencia'?'📱 Transfer':'💵 Efectivo'}</span></td>
+      <td style="font-size:12px;">${o.items.map(i=>`${i.qty}×${i.name}`).join(', ')}</td>
+      <td><strong>$${o.total.toFixed(2)}</strong></td>
+      <td>$${(o.change||0).toFixed(2)}</td>
+      <td style="font-size:12px;">${o.time||''}</td>
+    </tr>`).join('')||'<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:20px;">Sin ventas</td></tr>';
+}
+function exportCSV(){
+  if(!sales.length){showToast('No hay ventas');return;}
+  const rows=[['#','Cliente','Origen','Pago','Productos','Total','Cambio','Hora']];
+  sales.forEach((o,i)=>rows.push([o.orderNum||i+1,o.customer,o.source==='kiosk'?'Kiosko':'Caja',o.payMethod||'efectivo',o.items.map(x=>`${x.qty}x${x.name}`).join('; '),o.total.toFixed(2),(o.change||0).toFixed(2),o.time||'']));
+  const csv=rows.map(r=>r.map(c=>`"${c}"`).join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);
+  a.download='ventas_deli_frozen_'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click();showToast('✅ CSV exportado');
+}
+
+// ══════════════════════════════════════
+// REGISTER HISTORY
+// ══════════════════════════════════════
+function renderRegisterHistory(){
+  const c=document.getElementById('register-history-list');
+  if(!registers.length){c.innerHTML='<div class="empty"><div class="empty-icon">📒</div><p>Sin registros aún</p></div>';return;}
+  c.innerHTML=[...registers].reverse().map(r=>`
+    <div class="reg-card ${r.status==='closed'?'closed':''}">
+      <div class="reg-header">
+        <div class="reg-title">${new Date(r.openedAt).toLocaleDateString('es-EC',{weekday:'long',day:'numeric',month:'long',year:'numeric'})} <span class="badge ${r.status==='closed'?'badge-green':'badge-warn'}">${r.status==='closed'?'✅ Cerrada':'🟡 Abierta'}</span></div>
+      </div>
+      <div class="reg-detail">
+        <strong>Apertura:</strong> ${r.openedBy} · ${new Date(r.openedAt).toLocaleTimeString('es-EC',{hour:'2-digit',minute:'2-digit'})} · Monto inicial: $${r.openingAmount.toFixed(2)}<br>
+        ${r.openingNotes?`<em>Nota apertura: ${r.openingNotes}</em><br>`:''}
+        ${r.status==='closed'?`<strong>Cierre:</strong> ${r.closedBy} · ${new Date(r.closedAt).toLocaleTimeString('es-EC',{hour:'2-digit',minute:'2-digit'})} · Efectivo contado: $${r.closingAmount.toFixed(2)}<br>
+        <strong>Total ventas:</strong> $${r.totalSales.toFixed(2)} · ${r.totalOrders} pedidos · Efectivo: $${r.cashSales.toFixed(2)} · Transfer: $${r.transferSales.toFixed(2)}<br>
+        ${r.closingNotes?`<em>Nota cierre: ${r.closingNotes}</em>`:''}`:
+        '<em style="color:var(--warn);">Caja aún abierta</em>'}
+      </div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════
+// AI SUGGESTIONS
+// ══════════════════════════════════════
+async function renderSugerencias(){
+  const c=document.getElementById('ai-suggestions-container');
+  c.innerHTML='<div style="text-align:center;padding:40px;"><div class="ai-spinner"></div><p style="color:var(--muted);">Analizando ventas...</p></div>';
+  const pc={},pr={};
+  sales.forEach(o=>o.items.forEach(i=>{pc[i.name]=(pc[i.name]||0)+i.qty;pr[i.name]=(pr[i.name]||0)+i.price*i.qty;}));
+  const total=sales.reduce((s,o)=>s+o.total,0);
+  const top3=Object.entries(pc).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([n,c])=>`${n}(${c}uds)`).join(', ');
+  const ticket=sales.length?(total/sales.length).toFixed(2):0;
+  const cashPct=sales.length?Math.round(sales.filter(s=>s.payMethod==='efectivo').length/sales.length*100):0;
+  const prompt=`Eres asesor de "Deli Frozen", heladería en Mata de Cacao, Babahoyo, Ecuador. Datos: ${sales.length} pedidos, $${total.toFixed(2)} total, ticket $${ticket}, top: ${top3||'sin datos'}, ${cashPct}% en efectivo. Menú: Cono$1, Pequeño$1.50, Mediano$2, Grande$3.50, XL$4.50, Fusión$2.50, toppings$0.15-$0.50. Da 5 sugerencias en JSON:[{"titulo":"...","tipo":"exito|alerta|mejora","cuerpo":"..."}]. Solo JSON.`;
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
+    const data=await res.json();
+    const sugs=JSON.parse(data.content.map(x=>x.text||'').join('').replace(/```json|```/g,'').trim());
+    c.innerHTML=sugs.map(s=>`<div class="suggestion-card ${s.tipo==='alerta'?'warning':s.tipo==='exito'?'success':''}"><div class="sug-header"><div class="sug-title">${s.tipo==='exito'?'✅':s.tipo==='alerta'?'⚠️':'💡'} ${s.titulo}</div><span class="badge ${s.tipo==='exito'?'badge-green':s.tipo==='alerta'?'badge-warn':'badge-purple'}">${s.tipo==='exito'?'Fortaleza':s.tipo==='alerta'?'Atención':'Mejora'}</span></div><div class="sug-body">${s.cuerpo}</div></div>`).join('');
+  }catch{c.innerHTML='<div class="suggestion-card success"><div class="sug-header"><div class="sug-title">✅ Sistema funcionando</div></div><div class="sug-body">Las sugerencias IA requieren conexión a internet. Cuando tengas ventas registradas y conexión, aparecerán aquí automáticamente.</div></div>';}
+}
+
+// ══════════════════════════════════════
+// MENU EDITOR
+// ══════════════════════════════════════
+function renderMenuEditor(){
+  document.getElementById('menu-editor-list').innerHTML=menu.map(i=>`
+    <div class="menu-list-item">
+      ${i.img?`<img src="${i.img}" class="menu-list-thumb">`:
+      `<div class="menu-list-thumb">${i.emoji}</div>`}
+      <div class="item-info"><div class="name">${i.name}</div><div class="price">$${i.price.toFixed(2)}</div><div class="cat">${i.category} · ${i.desc||''}</div></div>
+      <button class="btn btn-outline btn-sm" onclick="editItem(${i.id})">✏️</button>
+      <button class="btn btn-danger btn-sm" onclick="deleteItem(${i.id})">🗑️</button>
+    </div>`).join('');
+}
+function editItem(id){
+  const i=menu.find(x=>x.id===id);if(!i)return;
+  document.getElementById('edit-item-id').value=id;
+  document.getElementById('item-name').value=i.name;
+  document.getElementById('item-category').value=i.category;
+  document.getElementById('item-price').value=i.price;
+  document.getElementById('item-emoji').value=i.emoji;
+  document.getElementById('item-desc').value=i.desc||'';
+  currentItemImg=i.img||'';
+  const prev=document.getElementById('item-img-preview');
+  const ph=document.getElementById('item-img-placeholder');
+  if(i.img){prev.src=i.img;prev.style.display='block';ph.style.display='none';}
+  else{prev.style.display='none';ph.style.display='block';}
+}
+function saveMenuItem(){
+  const id=document.getElementById('edit-item-id').value;
+  const name=document.getElementById('item-name').value.trim();
+  const category=document.getElementById('item-category').value.trim();
+  const price=parseFloat(document.getElementById('item-price').value);
+  const emoji=document.getElementById('item-emoji').value.trim()||'🍦';
+  const desc=document.getElementById('item-desc').value.trim();
+  if(!name||!category||isNaN(price)){showToast('⚠️ Completa nombre, categoría y precio');return;}
+  if(id){const idx=menu.findIndex(i=>i.id===parseInt(id));if(idx!==-1)menu[idx]={...menu[idx],name,category,price,emoji,desc,img:currentItemImg};}
+  else menu.push({id:Date.now(),name,category,price,emoji,desc,img:currentItemImg});
+  save(SK.menu,menu);clearMenuForm();renderMenuEditor();renderMenuGrid();renderFilterTabs();
+  showToast('✅ Producto guardado');
+}
+function deleteItem(id){
+  if(!confirm('¿Eliminar este producto?'))return;
+  menu=menu.filter(i=>i.id!==id);
+  save(SK.menu,menu);renderMenuEditor();renderMenuGrid();renderFilterTabs();
+  showToast('🗑️ Eliminado');
+}
+function clearMenuForm(){
+  document.getElementById('edit-item-id').value='';
+  ['item-name','item-category','item-price','item-emoji','item-desc'].forEach(id=>document.getElementById(id).value='');
+  currentItemImg='';
+  document.getElementById('item-img-preview').style.display='none';
+  document.getElementById('item-img-placeholder').style.display='block';
+  document.getElementById('item-img-input').value='';
+}
+
+// ══════════════════════════════════════
+// KIOSK
+// ══════════════════════════════════════
+function initKiosk(){renderKioskFilterTabs();renderKioskMenuGrid();}
+function renderKioskMenuGrid(filter='all'){
+  const g=document.getElementById('kiosk-menu-grid');if(!g)return;
+  const items=filter==='all'?menu:menu.filter(i=>i.category===filter);
+  g.innerHTML=items.map(i=>`
+    <div class="kiosk-item" onclick="addToKioskCart(${i.id})">
+      ${i.img?`<img src="${i.img}" class="kiosk-item-img">`:
+      `<div class="kiosk-item-placeholder">${i.emoji}</div>`}
+      <div class="ki-name">${i.name}</div>
+      <div class="ki-desc">${i.desc||''}</div>
+      <div class="ki-price">$${i.price.toFixed(2)}</div>
+    </div>`).join('');
+}
+function renderKioskFilterTabs(){
+  const cats=['all',...new Set(menu.map(i=>i.category))];
+  const t=document.getElementById('kiosk-filter-tabs');if(!t)return;
+  t.innerHTML=cats.map((c,idx)=>`<div class="kiosk-filter-tab ${idx===0?'active':''}" onclick="filterKioskCat('${c}',this)">${c==='all'?'Todos':c}</div>`).join('');
+}
+function filterKioskCat(cat,el){
+  document.querySelectorAll('.kiosk-filter-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');renderKioskMenuGrid(cat);
+}
+function addToKioskCart(id){
+  const item=menu.find(i=>i.id===id);if(!item)return;
+  const ex=kioskCart.find(c=>c.id===id);
+  if(ex)ex.qty++;else kioskCart.push({...item,qty:1});
+  renderKioskCart();
+}
+function updateKioskQty(id,d){
+  const idx=kioskCart.findIndex(c=>c.id===id);if(idx===-1)return;
+  kioskCart[idx].qty+=d;if(kioskCart[idx].qty<=0)kioskCart.splice(idx,1);
+  renderKioskCart();
+}
+function clearKioskCart(){kioskCart=[];renderKioskCart();}
+function renderKioskCart(){
+  const c=document.getElementById('kiosk-cart-items');
+  const total=kioskCart.reduce((s,i)=>s+i.price*i.qty,0);
+  const count=kioskCart.reduce((s,i)=>s+i.qty,0);
+  document.getElementById('kiosk-total').textContent='$'+total.toFixed(2);
+  document.getElementById('kiosk-item-count').textContent=count;
+  document.getElementById('kiosk-send-btn').disabled=!kioskCart.length;
+  if(!kioskCart.length){c.innerHTML='<div class="empty" style="padding:20px 0;"><div class="empty-icon" style="font-size:32px;">🛒</div><p style="font-size:12px;">Nada aún</p></div>';return;}
+  c.innerHTML=kioskCart.map(i=>`
+    <div class="kiosk-cart-item">
+      ${i.img?`<img src="${i.img}" style="width:32px;height:32px;border-radius:6px;object-fit:cover;flex-shrink:0;">`:
+      `<span style="font-size:20px;">${i.emoji}</span>`}
+      <div class="kci-name">${i.name}</div>
+      <div style="display:flex;align-items:center;gap:4px;">
+        <button class="qty-btn" onclick="updateKioskQty(${i.id},-1)" style="width:22px;height:22px;font-size:14px;">−</button>
+        <span style="font-weight:800;min-width:16px;text-align:center;font-size:13px;">${i.qty}</span>
+        <button class="qty-btn" onclick="updateKioskQty(${i.id},1)" style="width:22px;height:22px;font-size:14px;">+</button>
+      </div>
+      <div class="kci-price">$${(i.price*i.qty).toFixed(2)}</div>
+    </div>`).join('');
+}
+function sendKioskOrder(){
+  if(!kioskCart.length)return;
+  const name=document.getElementById('kiosk-customer-name').value.trim()||'Cliente kiosko';
+  const total=kioskCart.reduce((s,i)=>s+i.price*i.qty,0);
+  const order={id:Date.now(),orderNum:'K-'+String(Date.now()).slice(-4),customer:name,items:[...kioskCart],total,cash:0,change:0,time:new Date().toLocaleTimeString('es-EC',{hour:'2-digit',minute:'2-digit'}),timestamp:Date.now(),status:'pending',source:'kiosk'};
+  const queue=load(SK.kiosk,[]);queue.push(order);save(SK.kiosk,queue);
+  document.getElementById('kiosk-success-msg').innerHTML=`Tu pedido fue enviado a caja.<br><strong>Total a pagar: $${total.toFixed(2)}</strong><br>En un momento te llaman, ${name}.`;
+  document.getElementById('kiosk-success').classList.add('show');
+}
+function resetKiosk(){kioskCart=[];document.getElementById('kiosk-customer-name').value='';document.getElementById('kiosk-success').classList.remove('show');renderKioskCart();}
+
+// ══════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.style.display='block';
+  setTimeout(()=>{t.style.display='none';},2500);
+}
+</script>
+</body>
+</html>
